@@ -6,6 +6,7 @@
 #include "RecoHcal/HcalPromptAnalysis/interface/HcalPFGAnalysisTemplate.h"
 #include "RecoHcal/HcalPromptAnalysis/interface/JetTrigAnalyzer.h"
 #include "RecoHcal/HcalPromptAnalysis/interface/AccessFEDinfo.h"
+#include "RecoHcal/HcalPromptAnalysis/interface/HcalPFGBeamSplashTemplate.h"
 
 DEFINE_SEAL_MODULE();
 DEFINE_ANOTHER_FWK_MODULE(HcalZS);
@@ -13,3 +14,4 @@ DEFINE_ANOTHER_FWK_MODULE(HcalChanMon);
 DEFINE_ANOTHER_FWK_MODULE(HcalPFGAnalysisTemplate);
 DEFINE_ANOTHER_FWK_MODULE(JetTrigAnalyzer);
 DEFINE_ANOTHER_FWK_MODULE(AccessFEDinfo);
+DEFINE_ANOTHER_FWK_MODULE(HcalPFGBeamSplashTemplate);
