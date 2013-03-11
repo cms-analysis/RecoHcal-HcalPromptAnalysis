@@ -207,18 +207,32 @@ private:
   TH2F* h_mapDepth2_HB;
   TH2F* h_mapDepth3_HB;
 
+  TH1F* h_nbadchannels_depth1_HB;
+  TH1F* h_runnbadchannels_depth1_HB;
   TH1F* h_badrate_depth1_HB;
   TH1F* h_runbadrate_depth1_HB;
   TH1F* h_runbadrate0_depth1_HB;
+
+  TH1F* h_nbadchannels_depth2_HB;
+  TH1F* h_runnbadchannels_depth2_HB;
   TH1F* h_badrate_depth2_HB;
   TH1F* h_runbadrate_depth2_HB;
   TH1F* h_runbadrate0_depth2_HB;
+
+  TH1F* h_nbadchannels_depth1_HE;
+  TH1F* h_runnbadchannels_depth1_HE;
   TH1F* h_badrate_depth1_HE;
   TH1F* h_runbadrate_depth1_HE;
   TH1F* h_runbadrate0_depth1_HE;
+
+  TH1F* h_nbadchannels_depth2_HE;
+  TH1F* h_runnbadchannels_depth2_HE;
   TH1F* h_badrate_depth2_HE;
   TH1F* h_runbadrate_depth2_HE;
   TH1F* h_runbadrate0_depth2_HE;
+
+  TH1F* h_nbadchannels_depth3_HE;
+  TH1F* h_runnbadchannels_depth3_HE;
   TH1F* h_badrate_depth3_HE;
   TH1F* h_runbadrate_depth3_HE;
   TH1F* h_runbadrate0_depth3_HE;
@@ -528,9 +542,11 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       {
 	eta=digi->id().ieta(); phi=digi->id().iphi(); depth=digi->id().depth(); nTS=digi->size();      
 
+////////////////////////////////////////////////////////////  for zerrors.C script:
         fillDigiErrors(digi); 
+////////////////////////////////////////////////////////////  for zratio34.C,zrms.C & zdifampl.C scripts:
         fillDigiAmplitude(digi); 
-////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////  for zRunRatio34.C script:
 	//////////// k0(sub): =0 HB; =1 HE; =2 HO; =2 HF;
 	//////////// k1(depth+1): = 1 - 4 ;
 	for(int k0 = 0; k0<4; k0++) {
@@ -538,10 +554,14 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	    //////////
 	    int aaa = 0;	
 	    int bbb = 0;	
+	    int nbadchannels = 0;	
 	    for(int k2 = 0; k2<82; k2++) {
 	      for(int k3 = 0; k3<72; k3++) {
 		aaa += badchannels[k0][k1][k2][k3];
-		if(badchannels[k0][k1][k2][k3] !=0) bbb += badchannels0[k0][k1][k2][k3];
+		if(badchannels[k0][k1][k2][k3] !=0) {
+		  bbb += badchannels0[k0][k1][k2][k3];
+		  ++nbadchannels;
+		}
 	      }//k3
 	    }//k2
 	    double badrate = 0.;	
@@ -550,12 +570,16 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	    //HB
 	    if(k0 == 0) {
 	      if(k1 == 0) { 
-		h_badrate_depth1_HB->Fill( badrate );
+		if(nbadchannels != 0 ) h_nbadchannels_depth1_HB->Fill( double(nbadchannels) );
+		h_runnbadchannels_depth1_HB->Fill( double(runcounter) , double(nbadchannels) );
+		if(badrate != 0 ) h_badrate_depth1_HB->Fill( badrate );
 		h_runbadrate_depth1_HB->Fill( double(runcounter) , badrate );
 		h_runbadrate0_depth1_HB->Fill( double(runcounter) , 1. );
 	      }
 	      if(k1 == 1) { 
-		h_badrate_depth2_HB->Fill( badrate );
+		if(nbadchannels != 0 ) h_nbadchannels_depth2_HB->Fill( double(nbadchannels) );
+		h_runnbadchannels_depth2_HB->Fill( double(runcounter) , double(nbadchannels) );
+		if(badrate != 0 ) h_badrate_depth2_HB->Fill( badrate );
 		h_runbadrate_depth2_HB->Fill( double(runcounter) , badrate );
 		h_runbadrate0_depth2_HB->Fill( double(runcounter) , 1. );
 	      }
@@ -563,17 +587,23 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	    //HE
 	    if(k0 == 1) {
 	      if(k1 == 0) { 
-		h_badrate_depth1_HE->Fill( badrate );
+		if(nbadchannels != 0 ) h_nbadchannels_depth1_HE->Fill( double(nbadchannels) );
+		h_runnbadchannels_depth1_HE->Fill( double(runcounter) , double(nbadchannels) );
+		if(badrate != 0 ) h_badrate_depth1_HE->Fill( badrate );
 		h_runbadrate_depth1_HE->Fill( double(runcounter) , badrate );
 		h_runbadrate0_depth1_HE->Fill( double(runcounter) , 1. );
 	      }
 	      if(k1 == 1) { 
-		h_badrate_depth2_HE->Fill( badrate );
+		if(nbadchannels != 0 ) h_nbadchannels_depth2_HE->Fill( double(nbadchannels) );
+		h_runnbadchannels_depth2_HE->Fill( double(runcounter) , double(nbadchannels) );
+		if(badrate != 0 ) h_badrate_depth2_HE->Fill( badrate );
 		h_runbadrate_depth2_HE->Fill( double(runcounter) , badrate );
 		h_runbadrate0_depth2_HE->Fill( double(runcounter) , 1. );
 	      }
 	      if(k1 == 2) { 
-		h_badrate_depth3_HE->Fill( badrate );
+		if(nbadchannels != 0 ) h_nbadchannels_depth3_HE->Fill( double(nbadchannels) );
+		h_runnbadchannels_depth3_HE->Fill( double(runcounter) , double(nbadchannels) );
+		if(badrate != 0 ) h_badrate_depth3_HE->Fill( badrate );
 		h_runbadrate_depth3_HE->Fill( double(runcounter) , badrate );
 		h_runbadrate0_depth3_HE->Fill( double(runcounter) , 1. );
 	      }
@@ -583,6 +613,8 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	}//k0
 	////////////
 	////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////  for Olga's script:
 	int iphi  = phi;
 	int ieta  = eta;
 	if(ieta > 0) ieta -= 1;
@@ -762,7 +794,7 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       } 
     }
   }
-  /////////////////////////////////////////////////// GetRMSOverNormalizedSignal 
+////////////////////////////////////////////////////////////////  for zcalib.C and zgain.C scripts:
   for(int k1 = 0; k1<4; k1++) {
     for(int k2 = 0; k2<82; k2++) {
       for(int k3 = 0; k3<72; k3++) {
@@ -805,9 +837,11 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	int kkk3  = kk3;
 	kkk3 -=1;
 
+////////////////////////////////////////////////////////////////  for zgain.C script:
 	int k2plot = k2-41;
 	double GetRMSOverNormalizedSignal =-1.;
 	if(signal[k1][k2][k3]>0.&& calib0[k1][kkk2][kkk3]>0.) {
+	  /////////// GetRMSOverNormalizedSignal 
 	  GetRMSOverNormalizedSignal = signal[k1][k2][k3]/calib0[k1][kkk2][kkk3];
 	  if(k1==0) {
 	    h_GetRMSOverNormalizedSignal_HB->Fill(GetRMSOverNormalizedSignal,1.);
@@ -839,6 +873,8 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	  if(k1==3) h_GetRMSOverNormalizedSignal3_HF->Fill(GetRMSOverNormalizedSignal,1.);  
 	}
 	////////// 
+////////////////////////////////////////////////////////////////  for zcalib.C script:
+
 	double ratio =0.;
 	if(calib0[k1][kkk2][kkk3]>0.) ratio = calib2[k1][kkk2][kkk3]/calib0[k1][kkk2][kkk3];
 	if(k1==0) {
@@ -880,7 +916,7 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     }                          
   /////////////////////////////////////////////////// 
 }
-// ------------ method called once each job just before starting event loop  ------------
+// ------------ method called once each job just before starting event loop  -----------
 void VeRawAnalyzer::beginJob()
 {
   hOutputFile   = new TFile( fOutputFileName.c_str(), "RECREATE" ) ;
@@ -980,26 +1016,41 @@ void VeRawAnalyzer::beginJob()
     h_mapDepth2_HE = new TH2F("h_mapDepth2_HE"," ", 82, -41., 41., 72, 0., 72.);
     h_mapDepth3_HE = new TH2F("h_mapDepth3_HE"," ", 82, -41., 41., 72, 0., 72.);
 
+    int bac= 50;
+    float bac2=51.;
+    h_nbadchannels_depth1_HB = new TH1F("h_nbadchannels_depth1_HB"," ",   100, 1.,-1.);
+    h_runnbadchannels_depth1_HB = new TH1F("h_runnbadchannels_depth1_HB"," ",   bac, 1.,bac2);
+    h_badrate_depth1_HB = new TH1F("h_badrate_depth1_HB"," ",   100, 0.,1.);
+    h_runbadrate_depth1_HB = new TH1F("h_runbadrate_depth1_HB"," ",             bac, 1.,bac2);
+    h_runbadrate0_depth1_HB = new TH1F("h_runbadrate0_depth1_HB"," ",           bac, 1.,bac2);
 
-    h_badrate_depth1_HB = new TH1F("h_badrate_depth1_HB"," ",   100, 1.,-1.);
-    h_runbadrate_depth1_HB = new TH1F("h_runbadrate_depth1_HB"," ",   100, 1.,101.);
-    h_runbadrate0_depth1_HB = new TH1F("h_runbadrate_depth1_HB"," ",   100, 1.,101.);
-    h_badrate_depth2_HB = new TH1F("h_badrate_depth2_HB"," ",   100, 1.,-1.);
-    h_runbadrate_depth2_HB = new TH1F("h_runbadrate_depth2_HB"," ",   100, 1.,101.);
-    h_runbadrate0_depth2_HB = new TH1F("h_runbadrate_depth2_HB"," ",   100, 1.,101.);
-    h_badrate_depth1_HE = new TH1F("h_badrate_depth1_HE"," ",   100, 1.,-1.);
-    h_runbadrate_depth1_HE = new TH1F("h_runbadrate_depth1_HE"," ",   100, 1.,101.);
-    h_runbadrate0_depth1_HE = new TH1F("h_runbadrate_depth1_HE"," ",   100, 1.,101.);
-    h_badrate_depth2_HE = new TH1F("h_badrate_depth2_HE"," ",   100, 1.,-1.);
-    h_runbadrate_depth2_HE = new TH1F("h_runbadrate_depth2_HE"," ",   100, 1.,101.);
-    h_runbadrate0_depth2_HE = new TH1F("h_runbadrate_depth2_HE"," ",   100, 1.,101.);
-    h_badrate_depth3_HE = new TH1F("h_badrate_depth3_HE"," ",   100, 1.,-1.);
-    h_runbadrate_depth3_HE = new TH1F("h_runbadrate_depth3_HE"," ",   100, 1.,101.);
-    h_runbadrate0_depth3_HE = new TH1F("h_runbadrate_depth3_HE"," ",   100, 1.,101.);
+    h_nbadchannels_depth2_HB = new TH1F("h_nbadchannels_depth2_HB"," ",   100, 1.,-1.);
+    h_runnbadchannels_depth2_HB = new TH1F("h_runnbadchannels_depth2_HB"," ",   bac, 1.,bac2);
+    h_badrate_depth2_HB = new TH1F("h_badrate_depth2_HB"," ",   100, 0.,1.);
+    h_runbadrate_depth2_HB = new TH1F("h_runbadrate_depth2_HB"," ",             bac, 1.,bac2);
+    h_runbadrate0_depth2_HB = new TH1F("h_runbadrate0_depth2_HB"," ",           bac, 1.,bac2);
+
+    h_nbadchannels_depth1_HE = new TH1F("h_nbadchannels_depth1_HE"," ",   100, 1.,-1.);
+    h_runnbadchannels_depth1_HE = new TH1F("h_runnbadchannels_depth1_HE"," ",   bac, 1.,bac2);
+    h_badrate_depth1_HE = new TH1F("h_badrate_depth1_HE"," ",   100, 0.,1.);
+    h_runbadrate_depth1_HE = new TH1F("h_runbadrate_depth1_HE"," ",             bac, 1.,bac2);
+    h_runbadrate0_depth1_HE = new TH1F("h_runbadrate0_depth1_HE"," ",           bac, 1.,bac2);
+
+    h_nbadchannels_depth2_HE = new TH1F("h_nbadchannels_depth2_HE"," ",   100, 1.,-1.);
+    h_runnbadchannels_depth2_HE = new TH1F("h_runnbadchannels_depth2_HE"," ",   bac, 1.,bac2);
+    h_badrate_depth2_HE = new TH1F("h_badrate_depth2_HE"," ",   100, 0.,1.);
+    h_runbadrate_depth2_HE = new TH1F("h_runbadrate_depth2_HE"," ",             bac, 1.,bac2);
+    h_runbadrate0_depth2_HE = new TH1F("h_runbadrate0_depth2_HE"," ",           bac, 1.,bac2);
+
+    h_nbadchannels_depth3_HE = new TH1F("h_nbadchannels_depth3_HE"," ",   100, 1.,-1.);
+    h_runnbadchannels_depth3_HE = new TH1F("h_runnbadchannels_depth3_HE"," ",   bac, 1.,bac2);
+    h_badrate_depth3_HE = new TH1F("h_badrate_depth3_HE"," ",   100, 0.,1.);
+    h_runbadrate_depth3_HE = new TH1F("h_runbadrate_depth3_HE"," ",             bac, 1.,bac2);
+    h_runbadrate0_depth3_HE = new TH1F("h_runbadrate0_depth3_HE"," ",           bac, 1.,bac2);
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-    int m7=2;
-    int m8=3;
-    int m9=5;
+    float m7=2;
+    float m8=3;
+    float m9=5;
     h_GetRMSOverNormalizedSignal_HB = new TH1F("h_GetRMSOverNormalizedSignal_HB"," ",   100, 0.,m7);
     h_GetRMSOverNormalizedSignal_HE = new TH1F("h_GetRMSOverNormalizedSignal_HE"," ",   100, 0.,m7);
     h_GetRMSOverNormalizedSignal_HO = new TH1F("h_GetRMSOverNormalizedSignal_HO"," ",   100, 0.,m8);
@@ -1574,23 +1625,32 @@ void VeRawAnalyzer::endJob(){
     h_GetRMSOverNormalizedSignal3_HO->Write();
     h_GetRMSOverNormalizedSignal3_HF->Write();
 
-
+    h_nbadchannels_depth1_HB->Write();
+    h_runnbadchannels_depth1_HB->Write();
     h_badrate_depth1_HB->Write();
     h_runbadrate_depth1_HB->Write();
     h_runbadrate0_depth1_HB->Write();
 
+    h_nbadchannels_depth2_HB->Write();
+    h_runnbadchannels_depth2_HB->Write();
     h_badrate_depth2_HB->Write();
     h_runbadrate_depth2_HB->Write();
     h_runbadrate0_depth2_HB->Write();
 
+    h_nbadchannels_depth1_HE->Write();
+    h_runnbadchannels_depth1_HE->Write();
     h_badrate_depth1_HE->Write();
     h_runbadrate_depth1_HE->Write();
     h_runbadrate0_depth1_HE->Write();
 
+    h_nbadchannels_depth2_HE->Write();
+    h_runnbadchannels_depth2_HE->Write();
     h_badrate_depth2_HE->Write();
     h_runbadrate_depth2_HE->Write();
     h_runbadrate0_depth2_HE->Write();
 
+    h_nbadchannels_depth3_HE->Write();
+    h_runnbadchannels_depth3_HE->Write();
     h_badrate_depth3_HE->Write();
     h_runbadrate_depth3_HE->Write();
     h_runbadrate0_depth3_HE->Write();
