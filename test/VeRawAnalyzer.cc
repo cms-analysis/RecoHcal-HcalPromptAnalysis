@@ -125,10 +125,17 @@ private:
   const HcalQIEShape* shape;
   
   int verbosity;
+
+  bool recordNtuples_;
+  bool recordHistoes_;
+
   double ratioHBMin_;
   double ratioHBMax_;
   double ratioHEMin_;
   double ratioHEMax_;
+  int nbadchannels1_;
+  int nbadchannels2_;
+  int nbadchannels3_;
 
   double rmsHBMin_;
   double rmsHBMax_;
@@ -143,6 +150,15 @@ private:
   int nevent;
   int nnnnnn;
   int counter;
+
+  int nnnnnn1;
+  int nnnnnn2;
+  int nnnnnn3;
+  int nnnnnn4;
+  int nnnnnn5;
+
+
+
   TH1F* h_errorGeneral;
   TH1F* h_error1;
   TH1F* h_error2;
@@ -209,32 +225,42 @@ private:
 
   TH1F* h_nbadchannels_depth1_HB;
   TH1F* h_runnbadchannels_depth1_HB;
-  TH1F* h_badrate_depth1_HB;
   TH1F* h_runbadrate_depth1_HB;
+  TH1F* h_runbadrate1_depth1_HB;
+  TH1F* h_runbadrate2_depth1_HB;
+  TH1F* h_runbadrate3_depth1_HB;
   TH1F* h_runbadrate0_depth1_HB;
 
   TH1F* h_nbadchannels_depth2_HB;
   TH1F* h_runnbadchannels_depth2_HB;
-  TH1F* h_badrate_depth2_HB;
   TH1F* h_runbadrate_depth2_HB;
+  TH1F* h_runbadrate1_depth2_HB;
+  TH1F* h_runbadrate2_depth2_HB;
+  TH1F* h_runbadrate3_depth2_HB;
   TH1F* h_runbadrate0_depth2_HB;
 
   TH1F* h_nbadchannels_depth1_HE;
   TH1F* h_runnbadchannels_depth1_HE;
-  TH1F* h_badrate_depth1_HE;
   TH1F* h_runbadrate_depth1_HE;
+  TH1F* h_runbadrate1_depth1_HE;
+  TH1F* h_runbadrate2_depth1_HE;
+  TH1F* h_runbadrate3_depth1_HE;
   TH1F* h_runbadrate0_depth1_HE;
 
   TH1F* h_nbadchannels_depth2_HE;
   TH1F* h_runnbadchannels_depth2_HE;
-  TH1F* h_badrate_depth2_HE;
   TH1F* h_runbadrate_depth2_HE;
+  TH1F* h_runbadrate1_depth2_HE;
+  TH1F* h_runbadrate2_depth2_HE;
+  TH1F* h_runbadrate3_depth2_HE;
   TH1F* h_runbadrate0_depth2_HE;
 
   TH1F* h_nbadchannels_depth3_HE;
   TH1F* h_runnbadchannels_depth3_HE;
-  TH1F* h_badrate_depth3_HE;
   TH1F* h_runbadrate_depth3_HE;
+  TH1F* h_runbadrate1_depth3_HE;
+  TH1F* h_runbadrate2_depth3_HE;
+  TH1F* h_runbadrate3_depth3_HE;
   TH1F* h_runbadrate0_depth3_HE;
 
   TH1F* h_Amplitude_HE;
@@ -322,14 +348,15 @@ private:
   double signal3[4][82][72];
   double calib2[4][82][72];
   int badchannels[4][4][82][72];
-  int badchannels0[4][4][82][72];
 
 
   int Nevent;
   int Run;
   int run0 ;
+  int run1 ;
   int runcounter ;
-  
+  int eventcounter;
+ 
   TTree*    myTree;
   TFile*    hOutputFile;
   ///////////////////////////////////////// 
@@ -352,14 +379,23 @@ private:
 VeRawAnalyzer::VeRawAnalyzer(const edm::ParameterSet& iConfig)
 {
   verbosity   =  iConfig.getUntrackedParameter<int>("Verbosity");
+  //
+  recordNtuples_=iConfig.getUntrackedParameter<bool>("recordNtuples");
+  recordHistoes_=iConfig.getUntrackedParameter<bool>("recordHistoes");
+  //
   ratioHBMin_      = iConfig.getParameter<double>("ratioHBMin");//
   ratioHBMax_      = iConfig.getParameter<double>("ratioHBMax");//
   ratioHEMin_      = iConfig.getParameter<double>("ratioHEMin");//
   ratioHEMax_      = iConfig.getParameter<double>("ratioHEMax");//
+  nbadchannels1_      = iConfig.getParameter<int>("nbadchannels1");//
+  nbadchannels2_      = iConfig.getParameter<int>("nbadchannels2");//
+  nbadchannels3_      = iConfig.getParameter<int>("nbadchannels3");//
+  //
   rmsHBMin_      = iConfig.getParameter<double>("rmsHBMin");//
   rmsHBMax_      = iConfig.getParameter<double>("rmsHBMax");//
   rmsHEMin_      = iConfig.getParameter<double>("rmsHEMin");//
   rmsHEMax_      = iConfig.getParameter<double>("rmsHEMax");//
+  //
   calibratioHBMin_ = iConfig.getParameter<double>("calibratioHBMin");//
   calibratioHEMin_ = iConfig.getParameter<double>("calibratioHEMin");//
   calibratioHOMin_ = iConfig.getParameter<double>("calibratioHOMin");//
@@ -370,14 +406,17 @@ VeRawAnalyzer::VeRawAnalyzer(const edm::ParameterSet& iConfig)
   // inputTag_ = iConfig.getUntrackedParameter<edm::InputTag>("DigiCollectionLabel");
   //  allowMissingInputs_=iConfig.getUntrackedParameter<bool>("AllowMissingInputs",false);
   
-  
+  std::cout<<" recordNtuples_ = " <<recordNtuples_ << std::endl;   
+  std::cout<<" recordHistoes_ = " <<recordHistoes_ << std::endl;   
   //
   lumi=0;
   numOfLaserEv=0;
   local_event=0;
   numOfTS=10;
   run0=-1 ;
+  run1=-1 ;
   runcounter=0 ;
+  eventcounter=0 ;
 }
 
 VeRawAnalyzer::~VeRawAnalyzer()
@@ -398,12 +437,11 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   lumi=iEvent.luminosityBlock();
 
   //////
-  //  ++eventcounter;
+  // to get runcounter:
   if(run0 != Run) {
     ++runcounter;
     cout  <<  " New Run =  "  << Run <<  " runcounter =  "  << runcounter <<  endl;
     run0 = Run;
-    //    eventcounter = 0;
   }
   //////
 
@@ -480,7 +518,6 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	calib2[k1][k2][k3] = 0.;
 	for(int k0 = 0; k0<4; k0++) {
 	  badchannels[k0][k1][k2][k3] = 0;
-	  badchannels0[k0][k1][k2][k3] = 0;
 	}  
       }  
     }  
@@ -494,6 +531,7 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   } else {
     for(HFDigiCollection::const_iterator digi=hf->begin();digi!=hf->end();digi++){
       eta=digi->id().ieta(); phi=digi->id().iphi(); depth=digi->id().depth(); nTS=digi->size();
+      counter++;
       int iphi  = phi;
       int ieta  = eta;
       if(ieta > 0) ieta -= 1;
@@ -542,126 +580,142 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       {
 	eta=digi->id().ieta(); phi=digi->id().iphi(); depth=digi->id().depth(); nTS=digi->size();      
 
+    /////////////////////////////////////// counters of event*digis
+    nnnnnn++;    
+    if(digi->id().subdet()==HcalBarrel && depth == 1) nnnnnn1++;    
+    if(digi->id().subdet()==HcalBarrel && depth == 2) nnnnnn2++;    
+    if(digi->id().subdet()==HcalEndcap && depth == 1) nnnnnn3++;    
+    if(digi->id().subdet()==HcalEndcap && depth == 2) nnnnnn4++;    
+    if(digi->id().subdet()==HcalEndcap && depth == 3) nnnnnn5++;    
+
 ////////////////////////////////////////////////////////////  for zerrors.C script:
-        fillDigiErrors(digi); 
+	if(recordHistoes_) fillDigiErrors(digi); 
 ////////////////////////////////////////////////////////////  for zratio34.C,zrms.C & zdifampl.C scripts:
-        fillDigiAmplitude(digi); 
-////////////////////////////////////////////////////////////////  for zRunRatio34.C script:
-	//////////// k0(sub): =0 HB; =1 HE; =2 HO; =2 HF;
-	//////////// k1(depth+1): = 1 - 4 ;
-	for(int k0 = 0; k0<4; k0++) {
-	  for(int k1 = 0; k1<4; k1++) {
-	    //////////
-	    int aaa = 0;	
-	    int bbb = 0;	
-	    int nbadchannels = 0;	
-	    for(int k2 = 0; k2<82; k2++) {
-	      for(int k3 = 0; k3<72; k3++) {
-		aaa += badchannels[k0][k1][k2][k3];
-		if(badchannels[k0][k1][k2][k3] !=0) {
-		  bbb += badchannels0[k0][k1][k2][k3];
-		  ++nbadchannels;
+        if(recordHistoes_) fillDigiAmplitude(digi); 
+	if(recordHistoes_) {
+	  ////////////////////////////////////////////////////////////////  for zRunRatio34.C script:
+	  //////////// k0(sub): =0 HB; =1 HE; =2 HO; =2 HF;
+	  //////////// k1(depth+1): = 1 - 4 ;
+	  for(int k0 = 0; k0<4; k0++) {
+	    for(int k1 = 0; k1<4; k1++) {
+	      //////////
+	      int nbadchannels = 0;	
+	      for(int k2 = 0; k2<82; k2++) {
+		for(int k3 = 0; k3<72; k3++) {
+		  if(badchannels[k0][k1][k2][k3] !=0) ++nbadchannels;
+		}//k3
+	      }//k2
+	      //////////
+	      //HB
+	      if(k0 == 0) {
+		if(k1 == 0) { 
+		  h_nbadchannels_depth1_HB->Fill(double(nbadchannels) );
+		  h_runnbadchannels_depth1_HB->Fill( double(runcounter) ,double(nbadchannels) );
+		  if(nbadchannels != 0 ) h_runbadrate_depth1_HB->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels1_) h_runbadrate1_depth1_HB->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels2_) h_runbadrate2_depth1_HB->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels3_) h_runbadrate3_depth1_HB->Fill(double(runcounter),1.);
+		  h_runbadrate0_depth1_HB->Fill( double(runcounter),1.);
 		}
-	      }//k3
-	    }//k2
-	    double badrate = 0.;	
-	    if(bbb != 0 ) badrate = aaa/bbb;
-	    //////////
-	    //HB
-	    if(k0 == 0) {
-	      if(k1 == 0) { 
-		if(nbadchannels != 0 ) h_nbadchannels_depth1_HB->Fill( double(nbadchannels) );
-		h_runnbadchannels_depth1_HB->Fill( double(runcounter) , double(nbadchannels) );
-		if(badrate != 0 ) h_badrate_depth1_HB->Fill( badrate );
-		h_runbadrate_depth1_HB->Fill( double(runcounter) , badrate );
-		h_runbadrate0_depth1_HB->Fill( double(runcounter) , 1. );
+		if(k1 == 1) { 
+		  h_nbadchannels_depth2_HB->Fill( double(nbadchannels) );
+		  h_runnbadchannels_depth2_HB->Fill( double(runcounter) , double(nbadchannels) );
+		  if(nbadchannels != 0 ) h_runbadrate_depth2_HB->Fill( double(runcounter) , 1.);
+		  if(nbadchannels > nbadchannels1_) h_runbadrate1_depth2_HB->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels2_) h_runbadrate2_depth2_HB->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels3_) h_runbadrate3_depth2_HB->Fill(double(runcounter),1.);
+		  h_runbadrate0_depth2_HB->Fill( double(runcounter) , 1. );
+		}
 	      }
-	      if(k1 == 1) { 
-		if(nbadchannels != 0 ) h_nbadchannels_depth2_HB->Fill( double(nbadchannels) );
-		h_runnbadchannels_depth2_HB->Fill( double(runcounter) , double(nbadchannels) );
-		if(badrate != 0 ) h_badrate_depth2_HB->Fill( badrate );
-		h_runbadrate_depth2_HB->Fill( double(runcounter) , badrate );
-		h_runbadrate0_depth2_HB->Fill( double(runcounter) , 1. );
-	      }
-	    }
-	    //HE
-	    if(k0 == 1) {
-	      if(k1 == 0) { 
-		if(nbadchannels != 0 ) h_nbadchannels_depth1_HE->Fill( double(nbadchannels) );
-		h_runnbadchannels_depth1_HE->Fill( double(runcounter) , double(nbadchannels) );
-		if(badrate != 0 ) h_badrate_depth1_HE->Fill( badrate );
-		h_runbadrate_depth1_HE->Fill( double(runcounter) , badrate );
-		h_runbadrate0_depth1_HE->Fill( double(runcounter) , 1. );
-	      }
-	      if(k1 == 1) { 
-		if(nbadchannels != 0 ) h_nbadchannels_depth2_HE->Fill( double(nbadchannels) );
-		h_runnbadchannels_depth2_HE->Fill( double(runcounter) , double(nbadchannels) );
-		if(badrate != 0 ) h_badrate_depth2_HE->Fill( badrate );
-		h_runbadrate_depth2_HE->Fill( double(runcounter) , badrate );
-		h_runbadrate0_depth2_HE->Fill( double(runcounter) , 1. );
-	      }
-	      if(k1 == 2) { 
-		if(nbadchannels != 0 ) h_nbadchannels_depth3_HE->Fill( double(nbadchannels) );
-		h_runnbadchannels_depth3_HE->Fill( double(runcounter) , double(nbadchannels) );
-		if(badrate != 0 ) h_badrate_depth3_HE->Fill( badrate );
-		h_runbadrate_depth3_HE->Fill( double(runcounter) , badrate );
-		h_runbadrate0_depth3_HE->Fill( double(runcounter) , 1. );
-	      }
-	    }////
-	    //////////
-	  }//k1
-	}//k0
-	////////////
-	////////////////////////////////////////////////////////////////
+	      //HE
+	      if(k0 == 1) {
+		if(k1 == 0) { 
+		  h_nbadchannels_depth1_HE->Fill( double(nbadchannels) );
+		  h_runnbadchannels_depth1_HE->Fill( double(runcounter) , double(nbadchannels) );
+		  if(nbadchannels != 0 ) h_runbadrate_depth1_HE->Fill( double(runcounter) , 1.);
+		  if(nbadchannels > nbadchannels1_) h_runbadrate1_depth1_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels2_) h_runbadrate2_depth1_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels3_) h_runbadrate3_depth1_HE->Fill(double(runcounter),1.);
+		  h_runbadrate0_depth1_HE->Fill( double(runcounter) , 1. );
+		}
+		if(k1 == 1) { 
+		  h_nbadchannels_depth2_HE->Fill( double(nbadchannels) );
+		  h_runnbadchannels_depth2_HE->Fill( double(runcounter) , double(nbadchannels) );
+		  if(nbadchannels != 0 ) h_runbadrate_depth2_HE->Fill( double(runcounter) , 1.);
+		  if(nbadchannels > nbadchannels1_) h_runbadrate1_depth2_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels2_) h_runbadrate2_depth2_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels3_) h_runbadrate3_depth2_HE->Fill(double(runcounter),1.);
+		  h_runbadrate0_depth2_HE->Fill( double(runcounter) , 1. );
+		}
+		if(k1 == 2) { 
+		  h_nbadchannels_depth3_HE->Fill( double(nbadchannels) );
+		  h_runnbadchannels_depth3_HE->Fill( double(runcounter) , double(nbadchannels) );
+		  if(nbadchannels != 0 ) h_runbadrate_depth3_HE->Fill( double(runcounter) , 1.);
+		  if(nbadchannels > nbadchannels1_) h_runbadrate1_depth3_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels2_) h_runbadrate2_depth3_HE->Fill(double(runcounter),1.);
+		  if(nbadchannels > nbadchannels3_) h_runbadrate3_depth3_HE->Fill(double(runcounter),1.);
+		  h_runbadrate0_depth3_HE->Fill( double(runcounter) , 1. );
+		}
+	      }////
+	      //////////
+	    }//k1
+	  }//k0
+	  ////////////
+	  
+	  ////////////////////////////////////////////////////////////////
+	}//if(recordHistoes_) 
 
 ////////////////////////////////////////////////////////////////  for Olga's script:
-	int iphi  = phi;
-	int ieta  = eta;
-	if(ieta > 0) ieta -= 1;
-	
-
-	if(digi->id().subdet()==HcalBarrel) 
-	  {                 
-	    if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
-	      TS_data[i]=adc2fC[digi->sample(i).adc()];
-	      signal[0][ieta+41][iphi] += TS_data[i];
-	      if(i>1&&i<6) signal3[0][ieta+41][iphi] += TS_data[i];
-	      if(abs(eta) == 15 || abs(eta) == 16) {
-		if(eta == 15) hb15[1][depth-1][phi-1][i] = TS_data[i];
-		if(eta == 16) hb16[1][depth-1][phi-1][i] = TS_data[i];
-		if(eta == -15) hb15[0][depth-1][phi-1][i] = TS_data[i];
-		if(eta == -16) hb16[0][depth-1][phi-1][i] = TS_data[i];
-	      } else {
-		hb[eta+14][0][phi-1][i] = TS_data[i];
+	if(recordNtuples_) {
+	  int iphi  = phi;
+	  int ieta  = eta;
+	  if(ieta > 0) ieta -= 1;
+	  
+	  if(digi->id().subdet()==HcalBarrel) 
+	    {                 
+	      if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
+		TS_data[i]=adc2fC[digi->sample(i).adc()];
+		signal[0][ieta+41][iphi] += TS_data[i];
+		if(i>1&&i<6) signal3[0][ieta+41][iphi] += TS_data[i];
+		if(abs(eta) == 15 || abs(eta) == 16) {
+		  if(eta == 15) hb15[1][depth-1][phi-1][i] = TS_data[i];
+		  if(eta == 16) hb16[1][depth-1][phi-1][i] = TS_data[i];
+		  if(eta == -15) hb15[0][depth-1][phi-1][i] = TS_data[i];
+		  if(eta == -16) hb16[0][depth-1][phi-1][i] = TS_data[i];
+		} else {
+		  hb[eta+14][0][phi-1][i] = TS_data[i];
+		}
 	      }
-	    }
-	    
-	    if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
-	    if(eta == 15&&phi==1 && verbosity > 0 ) std::cout<<" 15 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
-	  } 
-	
-	if(digi->id().subdet()==HcalEndcap)
-	  {  
-	    if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
-	      TS_data[i]=adc2fC[digi->sample(i).adc()];
-	      signal[1][ieta+41][iphi] += TS_data[i];
-	      if(i>1&&i<6) signal3[1][ieta+41][iphi] += TS_data[i];
-	      if( abs(eta) == 16 ) {
-		if(eta == 16) he16[1][0][phi-1][i] = TS_data[i];
-		if(eta == -16) he16[0][0][phi-1][i] = TS_data[i];
-	      } else {
-		int jeta = abs(eta);
-		if(eta>0) jeta = eta-4;
-		if(eta<0) jeta = eta+29;
-		if (verbosity == -22) std::cout<<" HE "<<eta<<" "<<jeta<<std::endl;
-                he[jeta][depth-1][phi-1][i] = TS_data[i];
-	      }
+	      
+	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+	      if(eta == 15&&phi==1 && verbosity > 0 ) std::cout<<" 15 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
 	    } 
-	    if(eta == 29&&phi==1 && verbosity > 0 ) std::cout<<" 29 eta HE "<<depth<<std::endl;
-	    if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
-	  }// HcalEndcap                                                                    
+	  
+	  if(digi->id().subdet()==HcalEndcap)
+	    {  
+	      if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
+		TS_data[i]=adc2fC[digi->sample(i).adc()];
+		signal[1][ieta+41][iphi] += TS_data[i];
+		if(i>1&&i<6) signal3[1][ieta+41][iphi] += TS_data[i];
+		if( abs(eta) == 16 ) {
+		  if(eta == 16) he16[1][0][phi-1][i] = TS_data[i];
+		  if(eta == -16) he16[0][0][phi-1][i] = TS_data[i];
+		} else {
+		  int jeta = abs(eta);
+		  if(eta>0) jeta = eta-4;
+		  if(eta<0) jeta = eta+29;
+		  if (verbosity == -22) std::cout<<" HE "<<eta<<" "<<jeta<<std::endl;
+		  he[jeta][depth-1][phi-1][i] = TS_data[i];
+		}
+	      } 
+	      if(eta == 29&&phi==1 && verbosity > 0 ) std::cout<<" 29 eta HE "<<depth<<std::endl;
+	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+	    }// HcalEndcap                                                                    
+	  
+	}//if(recordNtuples_)
 	
       }// for
+    
   }//hbhe.isValid
   
   ///////////////////////////////////////////////////   HODigiCollection
@@ -759,161 +813,180 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	      << " TS5= " << adc2fC[digi->sample(5).adc()&0xff] << endl;
 	}
       }// if(cal_det>0 && cal_det<5
-      /////////////////////////////////////////////     
-      if (cal_cbox<2){
-	nTS=digi->size();
-	if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
-	  TS_cal[i]=adc2fC[digi->sample(i).adc()&0xff];   
-	  int cal_RBX = getRBX(cal_det,cal_eta,cal_phi);
-	  if( cal_det == 0 ) continue;   // HcalEmpty - what it is? skip
+      ///////////////////////////////////////////// 
+      if(recordNtuples_) {    
+	if (cal_cbox<2){
+	  nTS=digi->size();
+	  if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
+	    TS_cal[i]=adc2fC[digi->sample(i).adc()&0xff];   
+	    int cal_RBX = getRBX(cal_det,cal_eta,cal_phi);
+	    if( cal_det == 0 ) continue;   // HcalEmpty - what it is? skip
+	    
+	    myCalEta[cal_det][cal_RBX] = cal_eta;
+	    myCalPhi[cal_det][cal_RBX] = cal_phi;
+	    
+	    if(cal_det == 1 ) {  
+	      if(cal_cbox == 0)  hb_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	      if(cal_cbox == 1)  hb_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	    }
+	    if(cal_det == 2 ) {
+	      if(cal_cbox == 0)  he_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	      if(cal_cbox == 1)  he_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	    }
+	    if(cal_det == 3 ) {
+	      if(cal_cbox == 0) ho_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	      if(cal_cbox == 1) ho_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	    }
+	  }
+	}
+	
+	if(local_event==5){
+	  if (verbosity == -22) {
+	    cout<<cal_det<<" "<<cal_cbox<<" "<<cal_phi<<" "<<cal_eta<<" "<<digi->id().cboxChannelString();
+	    for(int i=0; i<numOfTS; i++) cout<<" "<<TS_cal[i]<<" ";
+	    cout<<endl;
+	  }//if
+	}// if 
+      }//if(recordHistoes_) {
+
+    }//for(HcalCalibDigiCollection
+  }//if(calib.isValid(
+
+  if(recordHistoes_) {
+    ////////////////////////////////////////////////////////////////  for zcalib.C and zgain.C scripts:
+    for(int k1 = 0; k1<4; k1++) {
+      for(int k2 = 0; k2<82; k2++) {
+	for(int k3 = 0; k3<72; k3++) {
 	  
-	  myCalEta[cal_det][cal_RBX] = cal_eta;
-	  myCalPhi[cal_det][cal_RBX] = cal_phi;
+	  //if(k1==3) cout<<"signal[k1][k2][k3]= "<<signal[k1][k2][k3]<<" calib0[k1][k2][k3]= "<<calib0[k1][k2][k3]<<endl;
 	  
-	  if(cal_det == 1 ) {  
-	    if(cal_cbox == 0)  hb_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
-	    if(cal_cbox == 1)  hb_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	  // return to real indexes in eta and phi ( k20 and k30)
+	  int k20=k2-41;
+	  if(k2>0 || k2==0) k20=k2+1;
+	  int k30=k3+1; 
+	  
+	  // find calibration indexes in eta and phi ( kk2 and kk3) 
+	  int kk2=0, kk3=0;
+	  if(k1==0 || k1==1) {
+	    if(k20>0 ) kk2=1; else kk2=-1;
+	    if(k30==71 ||k30==72 || k30==1 || k30==2) kk3=71; else kk3=((k30-3)/4)*4+3;
 	  }
-	  if(cal_det == 2 ) {
-	    if(cal_cbox == 0)  he_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
-	    if(cal_cbox == 1)  he_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	  else if(k1==2){
+	    if(abs(k20)<=4){
+	      kk2=0;
+	      if(k30==71||k30==72||k30==1||k30==2||k30==3||k30==4) kk3=71; else kk3=((k30-5)/6)*6+5;
+	    }
+	    else{
+	      if(abs(k20)>4  && abs(k20)<=10)  kk2=1;
+	      if(abs(k20)>10 && abs(k20)<=15)  kk2=2;
+	      if(k20<0) kk2=-kk2;
+	      if(k30==71 ||k30==72 || (k30>=1 && k30<=10)) kk3=71; else kk3=((k30-11)/12)*12+11;
+	    }
 	  }
-	  if(cal_det == 3 ) {
-	    if(cal_cbox == 0) ho_calibration0[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
-	    if(cal_cbox == 1) ho_calibration1[cal_RBX][i] = adc2fC[digi->sample(i).adc()&0xff];
+	  else if(k1==3){
+	    if(k20>0) kk2=1; else kk2=-1;
+	    if(k30>=1  && k30<=18) kk3=1;
+	    if(k30>=19 && k30<=36) kk3=19;
+	    if(k30>=37 && k30<=54) kk3=37;
+	    if(k30>=55 && k30<=72) kk3=55;
 	  }
-	}
-      }
-      
-      if(local_event==5){
-	if (verbosity == -22) {
-	cout<<cal_det<<" "<<cal_cbox<<" "<<cal_phi<<" "<<cal_eta<<" "<<digi->id().cboxChannelString();
-	for(int i=0; i<numOfTS; i++) cout<<" "<<TS_cal[i]<<" ";
-	cout<<endl;
-	}
-      } 
-    }
-  }
-////////////////////////////////////////////////////////////////  for zcalib.C and zgain.C scripts:
-  for(int k1 = 0; k1<4; k1++) {
-    for(int k2 = 0; k2<82; k2++) {
-      for(int k3 = 0; k3<72; k3++) {
-
-//if(k1==3) cout<<"signal[k1][k2][k3]= "<<signal[k1][k2][k3]<<" calib0[k1][k2][k3]= "<<calib0[k1][k2][k3]<<endl;
-
-	// return to real indexes in eta and phi ( k20 and k30)
-	int k20=k2-41;
-	if(k2>0 || k2==0) k20=k2+1;
-	int k30=k3+1; 
-
-	// find calibration indexes in eta and phi ( kk2 and kk3) 
-	int kk2=0, kk3=0;
-	if(k1==0 || k1==1) {
-	  if(k20>0 ) kk2=1; else kk2=-1;
-	  if(k30==71 ||k30==72 || k30==1 || k30==2) kk3=71; else kk3=((k30-3)/4)*4+3;
-	}
-	else if(k1==2){
-	  if(abs(k20)<=4){
-	    kk2=0;
-	    if(k30==71||k30==72||k30==1||k30==2||k30==3||k30==4) kk3=71; else kk3=((k30-5)/6)*6+5;
+	  // return to indexes in massiv
+	  int kkk2  = kk2+41;
+	  if(kk2 > 0) kkk2 -= 1;  
+	  int kkk3  = kk3;
+	  kkk3 -=1;
+	  
+	  ////////////////////////////////////////////////////////////////  for zgain.C script:
+	  int k2plot = k2-41;
+	  double GetRMSOverNormalizedSignal =-1.;
+	  if(signal[k1][k2][k3]>0.&& calib0[k1][kkk2][kkk3]>0.) {
+	    /////////// GetRMSOverNormalizedSignal 
+	    GetRMSOverNormalizedSignal = signal[k1][k2][k3]/calib0[k1][kkk2][kkk3];
+	    if(k1==0) {
+	      h_GetRMSOverNormalizedSignal_HB->Fill(GetRMSOverNormalizedSignal,1.);
+	      h_NormalizedSignal3D_HB->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
+	      h_NormalizedSignal3D0_HB->Fill(double(k2plot), double(k3), 1.);    
+	    }
+	    if(k1==1) {
+	      h_GetRMSOverNormalizedSignal_HE->Fill(GetRMSOverNormalizedSignal,1.);
+	      h_NormalizedSignal3D_HE->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
+	      h_NormalizedSignal3D0_HE->Fill(double(k2plot), double(k3), 1.);    
+	    }
+	    if(k1==2) {
+	      h_GetRMSOverNormalizedSignal_HO->Fill(GetRMSOverNormalizedSignal,1.);
+	      h_NormalizedSignal3D_HO->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
+	      h_NormalizedSignal3D0_HO->Fill(double(k2plot), double(k3), 1.);    
+	    }
+	    if(k1==3) {
+	      h_GetRMSOverNormalizedSignal_HF->Fill(GetRMSOverNormalizedSignal,1.);
+	      h_NormalizedSignal3D_HF->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
+	      h_NormalizedSignal3D0_HF->Fill(double(k2plot), double(k3), 1.);    
+	    }
+	  } 
+	  GetRMSOverNormalizedSignal =-1.;
+	  if(signal3[k1][k2][k3]>0.&& calib3[k1][kkk2][kkk3]>0.) {
+	    GetRMSOverNormalizedSignal = signal3[k1][k2][k3]/calib3[k1][kkk2][kkk3];
+	    if(k1==0) h_GetRMSOverNormalizedSignal3_HB->Fill(GetRMSOverNormalizedSignal,1.);    
+	    if(k1==1) h_GetRMSOverNormalizedSignal3_HE->Fill(GetRMSOverNormalizedSignal,1.);    
+	    if(k1==2) h_GetRMSOverNormalizedSignal3_HO->Fill(GetRMSOverNormalizedSignal,1.);    
+	    if(k1==3) h_GetRMSOverNormalizedSignal3_HF->Fill(GetRMSOverNormalizedSignal,1.);  
 	  }
-	  else{
-	    if(abs(k20)>4  && abs(k20)<=10)  kk2=1;
-	    if(abs(k20)>10 && abs(k20)<=15)  kk2=2;
-	    if(k20<0) kk2=-kk2;
-	    if(k30==71 ||k30==72 || (k30>=1 && k30<=10)) kk3=71; else kk3=((k30-11)/12)*12+11;
-	  }
-	}
-	else if(k1==3){
-	  if(k20>0) kk2=1; else kk2=-1;
-	  if(k30>=1  && k30<=18) kk3=1;
-	  if(k30>=19 && k30<=36) kk3=19;
-	  if(k30>=37 && k30<=54) kk3=37;
-	  if(k30>=55 && k30<=72) kk3=55;
-	}
-	// return to indexes in massiv
-	int kkk2  = kk2+41;
-	if(kk2 > 0) kkk2 -= 1;  
-	int kkk3  = kk3;
-	kkk3 -=1;
-
-////////////////////////////////////////////////////////////////  for zgain.C script:
-	int k2plot = k2-41;
-	double GetRMSOverNormalizedSignal =-1.;
-	if(signal[k1][k2][k3]>0.&& calib0[k1][kkk2][kkk3]>0.) {
-	  /////////// GetRMSOverNormalizedSignal 
-	  GetRMSOverNormalizedSignal = signal[k1][k2][k3]/calib0[k1][kkk2][kkk3];
+	  ////////// 
+	  ////////////////////////////////////////////////////////////////  for zcalib.C script:
+	  
+	  double ratio =0.;
+	  if(calib0[k1][kkk2][kkk3]>0.) ratio = calib2[k1][kkk2][kkk3]/calib0[k1][kkk2][kkk3];
 	  if(k1==0) {
-	    h_GetRMSOverNormalizedSignal_HB->Fill(GetRMSOverNormalizedSignal,1.);
-	    h_NormalizedSignal3D_HB->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
-	    h_NormalizedSignal3D0_HB->Fill(double(k2plot), double(k3), 1.);    
+	    h_RatioCalib_HB->Fill(ratio,1.);
+	    if(ratio < calibratioHBMin_ ) h_mapRatioCalib047_HB->Fill(double(k2plot), double(k3), 1.);
+	    h_mapRatioCalib_HB->Fill(double(k2plot), double(k3), ratio);    
+	    h_map_HB->Fill(double(k2plot), double(k3), 1.);    
 	  }
 	  if(k1==1) {
-	    h_GetRMSOverNormalizedSignal_HE->Fill(GetRMSOverNormalizedSignal,1.);
-	    h_NormalizedSignal3D_HE->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
-	    h_NormalizedSignal3D0_HE->Fill(double(k2plot), double(k3), 1.);    
+	    h_RatioCalib_HE->Fill(ratio,1.);
+	    if(ratio < calibratioHEMin_ ) h_mapRatioCalib047_HE->Fill(double(k2plot), double(k3), 1.);
+	    h_mapRatioCalib_HE->Fill(double(k2plot), double(k3), ratio);    
+	    h_map_HE->Fill(double(k2plot), double(k3), 1.);    
 	  }
 	  if(k1==2) {
-	    h_GetRMSOverNormalizedSignal_HO->Fill(GetRMSOverNormalizedSignal,1.);
-	    h_NormalizedSignal3D_HO->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
-	    h_NormalizedSignal3D0_HO->Fill(double(k2plot), double(k3), 1.);    
+	    h_RatioCalib_HO->Fill(ratio,1.);
+	    if(ratio < calibratioHOMin_ ) h_mapRatioCalib047_HO->Fill(double(k2plot), double(k3), 1.);
+	    h_mapRatioCalib_HO->Fill(double(k2plot), double(k3), ratio);    
+	    h_map_HO->Fill(double(k2plot), double(k3), 1.);    
 	  }
 	  if(k1==3) {
-	    h_GetRMSOverNormalizedSignal_HF->Fill(GetRMSOverNormalizedSignal,1.);
-	    h_NormalizedSignal3D_HF->Fill(double(k2plot), double(k3), signal[k1][k2][k3]);
-	    h_NormalizedSignal3D0_HF->Fill(double(k2plot), double(k3), 1.);    
+	    h_RatioCalib_HF->Fill(ratio,1.);
+	    if(ratio < calibratioHFMin_ ) h_mapRatioCalib047_HF->Fill(double(k2plot), double(k3), 1.);
+	    h_mapRatioCalib_HF->Fill(double(k2plot), double(k3), ratio);    
+	    h_map_HF->Fill(double(k2plot), double(k3), 1.);    
 	  }
-	} 
-	GetRMSOverNormalizedSignal =-1.;
-	if(signal3[k1][k2][k3]>0.&& calib3[k1][kkk2][kkk3]>0.) {
-	  GetRMSOverNormalizedSignal = signal3[k1][k2][k3]/calib3[k1][kkk2][kkk3];
-	  if(k1==0) h_GetRMSOverNormalizedSignal3_HB->Fill(GetRMSOverNormalizedSignal,1.);    
-	  if(k1==1) h_GetRMSOverNormalizedSignal3_HE->Fill(GetRMSOverNormalizedSignal,1.);    
-	  if(k1==2) h_GetRMSOverNormalizedSignal3_HO->Fill(GetRMSOverNormalizedSignal,1.);    
-	  if(k1==3) h_GetRMSOverNormalizedSignal3_HF->Fill(GetRMSOverNormalizedSignal,1.);  
-	}
-	////////// 
-////////////////////////////////////////////////////////////////  for zcalib.C script:
-
-	double ratio =0.;
-	if(calib0[k1][kkk2][kkk3]>0.) ratio = calib2[k1][kkk2][kkk3]/calib0[k1][kkk2][kkk3];
-	if(k1==0) {
-	  h_RatioCalib_HB->Fill(ratio,1.);
-	  if(ratio < calibratioHBMin_ ) h_mapRatioCalib047_HB->Fill(double(k2plot), double(k3), 1.);
-	  h_mapRatioCalib_HB->Fill(double(k2plot), double(k3), ratio);    
-	  h_map_HB->Fill(double(k2plot), double(k3), 1.);    
-	}
-	if(k1==1) {
-	  h_RatioCalib_HE->Fill(ratio,1.);
-	  if(ratio < calibratioHEMin_ ) h_mapRatioCalib047_HE->Fill(double(k2plot), double(k3), 1.);
-	  h_mapRatioCalib_HE->Fill(double(k2plot), double(k3), ratio);    
-	  h_map_HE->Fill(double(k2plot), double(k3), 1.);    
-	}
-	if(k1==2) {
-	  h_RatioCalib_HO->Fill(ratio,1.);
-	  if(ratio < calibratioHOMin_ ) h_mapRatioCalib047_HO->Fill(double(k2plot), double(k3), 1.);
-	  h_mapRatioCalib_HO->Fill(double(k2plot), double(k3), ratio);    
-	  h_map_HO->Fill(double(k2plot), double(k3), 1.);    
-	}
-	if(k1==3) {
-	  h_RatioCalib_HF->Fill(ratio,1.);
-	  if(ratio < calibratioHFMin_ ) h_mapRatioCalib047_HF->Fill(double(k2plot), double(k3), 1.);
-	  h_mapRatioCalib_HF->Fill(double(k2plot), double(k3), ratio);    
-	  h_map_HF->Fill(double(k2plot), double(k3), 1.);    
-	}
-	////////// 
-      } // k3 
-    }  // k2
-  }  // k1
+	  ////////// 
+	} // k3 
+      }  // k2
+    }  // k1
+  }//if(recordHistoes_)
   /////////////////////////////////////////////////// 
-  myTree->Fill();
+  if(recordNtuples_) myTree->Fill();
   
+  /////////////////////////////////////////////////// 
   if(++local_event%100==0)
     { 
       if (verbosity == -22) cout<<"run "<<Run<<" processing events "<<local_event<<" ok, "
 				<<", lumi "<<lumi
 				<<", numOfLaserEv "<<numOfLaserEv<<endl;          
     }                          
+  /////////////////////////////////////////////////// 
+  // to get eventcounter - N events in Run
+  if(run1 != Run) {
+    run1 = Run;
+    if( runcounter != 1) {
+      cout<<" for Run = "<<Run<<" with runcounter = "<<runcounter<<" #ev in this Run = "<<eventcounter<<endl;
+    }
+    eventcounter = 0;
+  }
+  ++eventcounter;
+  /////////////////////////////////////////////////// 
+  
   /////////////////////////////////////////////////// 
 }
 // ------------ method called once each job just before starting event loop  -----------
@@ -924,55 +997,60 @@ void VeRawAnalyzer::beginJob()
   nnnnnn = 0;
   nevent = 0; 
   counter = 0;
+  nnnnnn1= 0;
+  nnnnnn2= 0;
+  nnnnnn3= 0;
+  nnnnnn4= 0;
+  nnnnnn5= 0;
+
+
   //////////////////////////////////////////////////////////////////////////////////    book histoes
-//  ha2 = new TH2F("ha2"," ", 82, -41., 41., 72, 0., 72.);
-
-  h_errorGeneral = new TH1F("h_errorGeneral"," ", 5, 0., 5.);
-  h_error1 = new TH1F("h_error1"," ", 5, 0., 5.);
-  h_error2 = new TH1F("h_error2"," ", 5, 0., 5.);
-  h_error3 = new TH1F("h_error3"," ", 5, 0., 5.);
-  h_amplError = new TH1F("h_amplError"," ", 100, -2., 8.);
-  h_amplFine = new TH1F("h_amplFine"," ", 100, -2., 8.);
-  
-  h_errorGeneral_HB = new TH1F("h_errorGeneral_HB"," ", 5, 0., 5.);
-  h_error1_HB = new TH1F("h_error1_HB"," ", 5, 0., 5.);
-  h_error2_HB = new TH1F("h_error2_HB"," ", 5, 0., 5.);
-  h_error3_HB = new TH1F("h_error3_HB"," ", 5, 0., 5.);
-  h_error4_HB = new TH1F("h_error4_HB"," ", 5, 0., 5.);
-  h_error5_HB = new TH1F("h_error5_HB"," ", 5, 0., 5.);
-  h_error6_HB = new TH1F("h_error6_HB"," ", 5, 0., 5.);
-  h_error7_HB = new TH1F("h_error7_HB"," ", 5, 0., 5.);
-  h_amplError_HB = new TH1F("h_amplError_HB"," ", 100, -2., 8.);
-  h_amplFine_HB = new TH1F("h_amplFine_HB"," ", 100, -2., 8.);
-  h_mapDepth1Error_HB = new TH2F("h_mapDepth1Error_HB"," ", 82, -41., 41., 72, 0., 72.);
-  h_mapDepth2Error_HB = new TH2F("h_mapDepth2Error_HB"," ", 82, -41., 41., 72, 0., 72.);
-  h_mapDepth3Error_HB = new TH2F("h_mapDepth3Error_HB"," ", 82, -41., 41., 72, 0., 72.);
-  h_fiber0_HB = new TH1F("h_fiber0_HB"," ", 10, 0., 10.);
-  h_fiber1_HB = new TH1F("h_fiber1_HB"," ", 10, 0., 10.);
-  h_fiber2_HB = new TH1F("h_fiber2_HB"," ", 40, 0., 40.);
-  h_repetedcapid_HB = new TH1F("h_repetedcapid_HB"," ", 5, 0., 5.);
-  
-  h_errorGeneral_HE = new TH1F("h_errorGeneral_HE"," ", 5, 0., 5.);
-  h_error1_HE = new TH1F("h_error1_HE"," ", 5, 0., 5.);
-  h_error2_HE = new TH1F("h_error2_HE"," ", 5, 0., 5.);
-  h_error3_HE = new TH1F("h_error3_HE"," ", 5, 0., 5.);
-  h_error4_HE = new TH1F("h_error4_HE"," ", 5, 0., 5.);
-  h_error5_HE = new TH1F("h_error5_HE"," ", 5, 0., 5.);
-  h_error6_HE = new TH1F("h_error6_HE"," ", 5, 0., 5.);
-  h_error7_HE = new TH1F("h_error7_HE"," ", 5, 0., 5.);
-  h_amplError_HE = new TH1F("h_amplError_HE"," ", 100, -2., 8.);
-  h_amplFine_HE = new TH1F("h_amplFine_HE"," ", 100, -2., 8.);
-  h_mapDepth1Error_HE = new TH2F("h_mapDepth1Error_HE"," ", 82, -41., 41., 72, 0., 72.);
-  h_mapDepth2Error_HE = new TH2F("h_mapDepth2Error_HE"," ", 82, -41., 41., 72, 0., 72.);
-  h_mapDepth3Error_HE = new TH2F("h_mapDepth3Error_HE"," ", 82, -41., 41., 72, 0., 72.);
-  h_fiber0_HE = new TH1F("h_fiber0_HE"," ", 10, 0., 10.);
-  h_fiber1_HE = new TH1F("h_fiber1_HE"," ", 10, 0., 10.);
-  h_fiber2_HE = new TH1F("h_fiber2_HE"," ", 40, 0., 40.);
-  h_repetedcapid_HE = new TH1F("h_repetedcapid_HE"," ", 5, 0., 5.);
-
-
-
-
+  if(recordHistoes_) {
+    //  ha2 = new TH2F("ha2"," ", 82, -41., 41., 72, 0., 72.);
+    
+    h_errorGeneral = new TH1F("h_errorGeneral"," ", 5, 0., 5.);
+    h_error1 = new TH1F("h_error1"," ", 5, 0., 5.);
+    h_error2 = new TH1F("h_error2"," ", 5, 0., 5.);
+    h_error3 = new TH1F("h_error3"," ", 5, 0., 5.);
+    h_amplError = new TH1F("h_amplError"," ", 100, -2., 8.);
+    h_amplFine = new TH1F("h_amplFine"," ", 100, -2., 8.);
+    
+    h_errorGeneral_HB = new TH1F("h_errorGeneral_HB"," ", 5, 0., 5.);
+    h_error1_HB = new TH1F("h_error1_HB"," ", 5, 0., 5.);
+    h_error2_HB = new TH1F("h_error2_HB"," ", 5, 0., 5.);
+    h_error3_HB = new TH1F("h_error3_HB"," ", 5, 0., 5.);
+    h_error4_HB = new TH1F("h_error4_HB"," ", 5, 0., 5.);
+    h_error5_HB = new TH1F("h_error5_HB"," ", 5, 0., 5.);
+    h_error6_HB = new TH1F("h_error6_HB"," ", 5, 0., 5.);
+    h_error7_HB = new TH1F("h_error7_HB"," ", 5, 0., 5.);
+    h_amplError_HB = new TH1F("h_amplError_HB"," ", 100, -2., 8.);
+    h_amplFine_HB = new TH1F("h_amplFine_HB"," ", 100, -2., 8.);
+    h_mapDepth1Error_HB = new TH2F("h_mapDepth1Error_HB"," ", 82, -41., 41., 72, 0., 72.);
+    h_mapDepth2Error_HB = new TH2F("h_mapDepth2Error_HB"," ", 82, -41., 41., 72, 0., 72.);
+    h_mapDepth3Error_HB = new TH2F("h_mapDepth3Error_HB"," ", 82, -41., 41., 72, 0., 72.);
+    h_fiber0_HB = new TH1F("h_fiber0_HB"," ", 10, 0., 10.);
+    h_fiber1_HB = new TH1F("h_fiber1_HB"," ", 10, 0., 10.);
+    h_fiber2_HB = new TH1F("h_fiber2_HB"," ", 40, 0., 40.);
+    h_repetedcapid_HB = new TH1F("h_repetedcapid_HB"," ", 5, 0., 5.);
+    
+    h_errorGeneral_HE = new TH1F("h_errorGeneral_HE"," ", 5, 0., 5.);
+    h_error1_HE = new TH1F("h_error1_HE"," ", 5, 0., 5.);
+    h_error2_HE = new TH1F("h_error2_HE"," ", 5, 0., 5.);
+    h_error3_HE = new TH1F("h_error3_HE"," ", 5, 0., 5.);
+    h_error4_HE = new TH1F("h_error4_HE"," ", 5, 0., 5.);
+    h_error5_HE = new TH1F("h_error5_HE"," ", 5, 0., 5.);
+    h_error6_HE = new TH1F("h_error6_HE"," ", 5, 0., 5.);
+    h_error7_HE = new TH1F("h_error7_HE"," ", 5, 0., 5.);
+    h_amplError_HE = new TH1F("h_amplError_HE"," ", 100, -2., 8.);
+    h_amplFine_HE = new TH1F("h_amplFine_HE"," ", 100, -2., 8.);
+    h_mapDepth1Error_HE = new TH2F("h_mapDepth1Error_HE"," ", 82, -41., 41., 72, 0., 72.);
+    h_mapDepth2Error_HE = new TH2F("h_mapDepth2Error_HE"," ", 82, -41., 41., 72, 0., 72.);
+    h_mapDepth3Error_HE = new TH2F("h_mapDepth3Error_HE"," ", 82, -41., 41., 72, 0., 72.);
+    h_fiber0_HE = new TH1F("h_fiber0_HE"," ", 10, 0., 10.);
+    h_fiber1_HE = new TH1F("h_fiber1_HE"," ", 10, 0., 10.);
+    h_fiber2_HE = new TH1F("h_fiber2_HE"," ", 40, 0., 40.);
+    h_repetedcapid_HE = new TH1F("h_repetedcapid_HE"," ", 5, 0., 5.);
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     h_Amplitude_HB = new TH1F("h_Amplitude_HB"," ", 100, 1.,4.);
     h_mapDepth1Amplitude225_HB = new TH2F("h_mapDepth1Amplitude225_HB"," ", 82, -41., 41., 72, 0., 72.);
@@ -1016,38 +1094,48 @@ void VeRawAnalyzer::beginJob()
     h_mapDepth2_HE = new TH2F("h_mapDepth2_HE"," ", 82, -41., 41., 72, 0., 72.);
     h_mapDepth3_HE = new TH2F("h_mapDepth3_HE"," ", 82, -41., 41., 72, 0., 72.);
 
-    int bac= 50;
-    float bac2=51.;
-    h_nbadchannels_depth1_HB = new TH1F("h_nbadchannels_depth1_HB"," ",   100, 1.,-1.);
+    int bac= 10;
+    float bac2=11.;
+    h_nbadchannels_depth1_HB = new TH1F("h_nbadchannels_depth1_HB"," ",   100, 1.,101.);
     h_runnbadchannels_depth1_HB = new TH1F("h_runnbadchannels_depth1_HB"," ",   bac, 1.,bac2);
-    h_badrate_depth1_HB = new TH1F("h_badrate_depth1_HB"," ",   100, 0.,1.);
     h_runbadrate_depth1_HB = new TH1F("h_runbadrate_depth1_HB"," ",             bac, 1.,bac2);
+    h_runbadrate1_depth1_HB = new TH1F("h_runbadrate1_depth1_HB"," ",             bac, 1.,bac2);
+    h_runbadrate2_depth1_HB = new TH1F("h_runbadrate2_depth1_HB"," ",             bac, 1.,bac2);
+    h_runbadrate3_depth1_HB = new TH1F("h_runbadrate3_depth1_HB"," ",             bac, 1.,bac2);
     h_runbadrate0_depth1_HB = new TH1F("h_runbadrate0_depth1_HB"," ",           bac, 1.,bac2);
 
-    h_nbadchannels_depth2_HB = new TH1F("h_nbadchannels_depth2_HB"," ",   100, 1.,-1.);
+    h_nbadchannels_depth2_HB = new TH1F("h_nbadchannels_depth2_HB"," ",   100, 1.,101.);
     h_runnbadchannels_depth2_HB = new TH1F("h_runnbadchannels_depth2_HB"," ",   bac, 1.,bac2);
-    h_badrate_depth2_HB = new TH1F("h_badrate_depth2_HB"," ",   100, 0.,1.);
     h_runbadrate_depth2_HB = new TH1F("h_runbadrate_depth2_HB"," ",             bac, 1.,bac2);
+    h_runbadrate1_depth2_HB = new TH1F("h_runbadrate1_depth2_HB"," ",             bac, 1.,bac2);
+    h_runbadrate2_depth2_HB = new TH1F("h_runbadrate2_depth2_HB"," ",             bac, 1.,bac2);
+    h_runbadrate3_depth2_HB = new TH1F("h_runbadrate3_depth2_HB"," ",             bac, 1.,bac2);
     h_runbadrate0_depth2_HB = new TH1F("h_runbadrate0_depth2_HB"," ",           bac, 1.,bac2);
 
-    h_nbadchannels_depth1_HE = new TH1F("h_nbadchannels_depth1_HE"," ",   100, 1.,-1.);
+    h_nbadchannels_depth1_HE = new TH1F("h_nbadchannels_depth1_HE"," ",   100, 1.,101.);
     h_runnbadchannels_depth1_HE = new TH1F("h_runnbadchannels_depth1_HE"," ",   bac, 1.,bac2);
-    h_badrate_depth1_HE = new TH1F("h_badrate_depth1_HE"," ",   100, 0.,1.);
     h_runbadrate_depth1_HE = new TH1F("h_runbadrate_depth1_HE"," ",             bac, 1.,bac2);
+    h_runbadrate1_depth1_HE = new TH1F("h_runbadrate1_depth1_HE"," ",             bac, 1.,bac2);
+    h_runbadrate2_depth1_HE = new TH1F("h_runbadrate2_depth1_HE"," ",             bac, 1.,bac2);
+    h_runbadrate3_depth1_HE = new TH1F("h_runbadrate3_depth1_HE"," ",             bac, 1.,bac2);
     h_runbadrate0_depth1_HE = new TH1F("h_runbadrate0_depth1_HE"," ",           bac, 1.,bac2);
 
-    h_nbadchannels_depth2_HE = new TH1F("h_nbadchannels_depth2_HE"," ",   100, 1.,-1.);
+    h_nbadchannels_depth2_HE = new TH1F("h_nbadchannels_depth2_HE"," ",   100, 1.,101.);
     h_runnbadchannels_depth2_HE = new TH1F("h_runnbadchannels_depth2_HE"," ",   bac, 1.,bac2);
-    h_badrate_depth2_HE = new TH1F("h_badrate_depth2_HE"," ",   100, 0.,1.);
     h_runbadrate_depth2_HE = new TH1F("h_runbadrate_depth2_HE"," ",             bac, 1.,bac2);
+    h_runbadrate1_depth2_HE = new TH1F("h_runbadrate1_depth2_HE"," ",             bac, 1.,bac2);
+    h_runbadrate2_depth2_HE = new TH1F("h_runbadrate2_depth2_HE"," ",             bac, 1.,bac2);
+    h_runbadrate3_depth2_HE = new TH1F("h_runbadrate3_depth2_HE"," ",             bac, 1.,bac2);
     h_runbadrate0_depth2_HE = new TH1F("h_runbadrate0_depth2_HE"," ",           bac, 1.,bac2);
 
-    h_nbadchannels_depth3_HE = new TH1F("h_nbadchannels_depth3_HE"," ",   100, 1.,-1.);
+    h_nbadchannels_depth3_HE = new TH1F("h_nbadchannels_depth3_HE"," ",   100, 1.,101.);
     h_runnbadchannels_depth3_HE = new TH1F("h_runnbadchannels_depth3_HE"," ",   bac, 1.,bac2);
-    h_badrate_depth3_HE = new TH1F("h_badrate_depth3_HE"," ",   100, 0.,1.);
     h_runbadrate_depth3_HE = new TH1F("h_runbadrate_depth3_HE"," ",             bac, 1.,bac2);
+    h_runbadrate1_depth3_HE = new TH1F("h_runbadrate1_depth3_HE"," ",             bac, 1.,bac2);
+    h_runbadrate2_depth3_HE = new TH1F("h_runbadrate2_depth3_HE"," ",             bac, 1.,bac2);
+    h_runbadrate3_depth3_HE = new TH1F("h_runbadrate3_depth3_HE"," ",             bac, 1.,bac2);
     h_runbadrate0_depth3_HE = new TH1F("h_runbadrate0_depth3_HE"," ",           bac, 1.,bac2);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     float m7=2;
     float m8=3;
     float m9=5;
@@ -1068,7 +1156,7 @@ void VeRawAnalyzer::beginJob()
     h_GetRMSOverNormalizedSignal3_HO = new TH1F("h_GetRMSOverNormalizedSignal3_HO"," ", 100, 0.,m8);
     h_GetRMSOverNormalizedSignal3_HF = new TH1F("h_GetRMSOverNormalizedSignal3_HF"," ", 100, 0.,m9);
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     h_RatioCalib_HB       = new TH1F("h_RatioCalib_HB"," ",      100, 0.,1.);
     h_mapRatioCalib047_HB = new TH2F("h_mapRatioCalib047_HB"," ", 82, -41., 41., 72, 0., 72.);
     h_mapRatioCalib_HB    = new TH2F("h_mapRatioCalib_HB"," ",    82, -41., 41., 72, 0., 72.);
@@ -1085,38 +1173,47 @@ void VeRawAnalyzer::beginJob()
     h_mapRatioCalib047_HF = new TH2F("h_mapRatioCalib047_HF"," ", 82, -41., 41., 72, 0., 72.);
     h_mapRatioCalib_HF    = new TH2F("h_mapRatioCalib_HF"," ",    82, -41., 41., 72, 0., 72.);
     h_map_HF              = new TH2F("h_map_HF"," ",              82, -41., 41., 72, 0., 72.);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
-  myTree = new TTree("Hcal","Hcal Tree");
-  myTree->Branch("Nevent",  &Nevent, "Nevent/I");
-  myTree->Branch("Run",  &Run, "Run/I");
- 
-// Calibration box
- 
-  myTree->Branch("myCalEta", myCalEta, "myCalEta[5][40]/I");
-  myTree->Branch("myCalPhi", myCalPhi, "myCalPhi[5][40]/I");
-  
-  myTree->Branch("hb_calibration0", hb_calibration0, "hb_calibration0[40][15]/F");
-  myTree->Branch("hb_calibration1", hb_calibration1, "hb_calibration1[40][15]/F");
-  
-  myTree->Branch("he_calibration0", he_calibration0, "he_calibration0[40][15]/F");
-  myTree->Branch("he_calibration1", he_calibration1, "he_calibration1[40][15]/F");
-  
-  myTree->Branch("hf_calibration0", hf_calibration0, "hf_calibration0[40][15]/F");
-  myTree->Branch("hf_calibration1", hf_calibration1, "hf_calibration1[40][15]/F");
-  
-  myTree->Branch("ho_calibration0", ho_calibration0, "ho_calibration0[40][15]/F");
-  myTree->Branch("ho_calibration1", ho_calibration1, "ho_calibration1[40][15]/F");
 
-// HBHE readouts
+    ////////////////////////////////////////////////////////////////////////////////////
+  }//if(recordHistoes_
 
-  myTree->Branch("hb15", hb15, "hb15[2][2][72][10]/F");
-  myTree->Branch("hb16", hb16, "hb16[2][2][72][10]/F");
-  myTree->Branch("he16", he16, "he16[2][1][72][10]/F");
-  myTree->Branch("hb", hb, "hb[29][1][72][10]/F");
-  myTree->Branch("he", he, "he[26][2][72][10]/F");
-  
+    ///////////////////////////////////////////////////////            ntuples:
+  if(recordNtuples_) {
+    
+    myTree = new TTree("Hcal","Hcal Tree");
+    myTree->Branch("Nevent",  &Nevent, "Nevent/I");
+    myTree->Branch("Run",  &Run, "Run/I");
+    
+    // Calibration box
+    
+    myTree->Branch("myCalEta", myCalEta, "myCalEta[5][40]/I");
+    myTree->Branch("myCalPhi", myCalPhi, "myCalPhi[5][40]/I");
+    
+    myTree->Branch("hb_calibration0", hb_calibration0, "hb_calibration0[40][15]/F");
+    myTree->Branch("hb_calibration1", hb_calibration1, "hb_calibration1[40][15]/F");
+    
+    myTree->Branch("he_calibration0", he_calibration0, "he_calibration0[40][15]/F");
+    myTree->Branch("he_calibration1", he_calibration1, "he_calibration1[40][15]/F");
+    
+    myTree->Branch("hf_calibration0", hf_calibration0, "hf_calibration0[40][15]/F");
+    myTree->Branch("hf_calibration1", hf_calibration1, "hf_calibration1[40][15]/F");
+    
+    myTree->Branch("ho_calibration0", ho_calibration0, "ho_calibration0[40][15]/F");
+    myTree->Branch("ho_calibration1", ho_calibration1, "ho_calibration1[40][15]/F");
+    
+    // HBHE readouts
+    
+    myTree->Branch("hb15", hb15, "hb15[2][2][72][10]/F");
+    myTree->Branch("hb16", hb16, "hb16[2][2][72][10]/F");
+    myTree->Branch("he16", he16, "he16[2][1][72][10]/F");
+    myTree->Branch("hb", hb, "hb[29][1][72][10]/F");
+    myTree->Branch("he", he, "he[26][2][72][10]/F");
+
+  }//if(recordNtuples_
+
+  //////////////////////////////////////////////////////////////////
+
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1128,20 +1225,19 @@ void VeRawAnalyzer::fillDigiErrors(HBHEDigiCollection::const_iterator& digiItr)
 
     CaloSamples tool;  // TS
     
-    nnnnnn++;    
     if (verbosity == -22) std::cout << "**************   in loop over Digis   counter =     " << nnnnnn << std::endl;
    
     HcalDetId cell(digiItr->id()); 
-    int depth = cell.depth();
+    int mdepth = cell.depth();
     int iphi  = cell.iphi()-1;
     int ieta  = cell.ieta();
     if(ieta > 0) ieta -= 1;
     int sub   = cell.subdet(); // 1-HB, 2-HE (HFDigiCollection: 4-HF)
     if (verbosity == -22) std::cout << std::endl << nnnnnn << " DIGI ->  "  
-				 << "sub, ieta, iphi, depth = "  
-				 <<  sub << ", " << ieta << ", " << iphi << ", " << depth 
+				 << "sub, ieta, iphi, mdepth = "  
+				 <<  sub << ", " << ieta << ", " << iphi << ", " << mdepth 
 				 << std::endl;
-    
+
     // !!!!!!
     int errorGeneral =  0;
     int error1 =  0;
@@ -1265,9 +1361,9 @@ void VeRawAnalyzer::fillDigiErrors(HBHEDigiCollection::const_iterator& digiItr)
    
       if(error1 !=0 || error2 !=0 || error3 !=0 ) {
 	h_amplError_HB->Fill(ampl,1.);
-	if(depth==1) h_mapDepth1Error_HB->Fill(double(ieta), double(iphi));    
-	if(depth==2) h_mapDepth2Error_HB->Fill(double(ieta), double(iphi));    
-	if(depth==3) h_mapDepth3Error_HB->Fill(double(ieta), double(iphi));    
+	if(mdepth==1) h_mapDepth1Error_HB->Fill(double(ieta), double(iphi));    
+	if(mdepth==2) h_mapDepth2Error_HB->Fill(double(ieta), double(iphi));    
+	if(mdepth==3) h_mapDepth3Error_HB->Fill(double(ieta), double(iphi));    
 	h_fiber0_HB->Fill(double(ERRORfiber), 1. );    
 	h_fiber1_HB->Fill(double(ERRORfiberChan), 1. );    
 	h_fiber2_HB->Fill(double(ERRORfiberAndChan), 1. );    
@@ -1288,9 +1384,9 @@ void VeRawAnalyzer::fillDigiErrors(HBHEDigiCollection::const_iterator& digiItr)
 
       if(error1 !=0 || error2 !=0 || error3 !=0 ) {
 	h_amplError_HE->Fill(ampl,1.);
-	if(depth==1) h_mapDepth1Error_HE->Fill(double(ieta), double(iphi));    
-	if(depth==2) h_mapDepth2Error_HE->Fill(double(ieta), double(iphi));    
-	if(depth==3) h_mapDepth3Error_HE->Fill(double(ieta), double(iphi));    
+	if(mdepth==1) h_mapDepth1Error_HE->Fill(double(ieta), double(iphi));    
+	if(mdepth==2) h_mapDepth2Error_HE->Fill(double(ieta), double(iphi));    
+	if(mdepth==3) h_mapDepth3Error_HE->Fill(double(ieta), double(iphi));    
 	h_fiber0_HE->Fill(double(ERRORfiber), 1. );    
 	h_fiber1_HE->Fill(double(ERRORfiberChan), 1. );    
 	h_fiber2_HE->Fill(double(ERRORfiberAndChan), 1. );    
@@ -1308,17 +1404,19 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
     CaloSamples tool;  // TS
     
     HcalDetId cell(digiItr->id()); 
-    int depth = cell.depth();
+    int mdepth = cell.depth();
 //    int iphi0  = cell.iphi();// 1-72
     int iphi  = cell.iphi()-1;// 0-71
 //    int ieta0  = cell.ieta();//-41 +41 !=0
     int ieta  = cell.ieta();
     if(ieta > 0) ieta -= 1;//-41 +41
     int sub   = cell.subdet(); // 1-HB, 2-HE (HFDigiCollection: 4-HF)
-    badchannels0[sub-1][depth-1][ieta+41][iphi] += 1;// 0-82 ; 0-71
-    if (verbosity == -22) std::cout << std::endl << " fillDigiAmplitude     DIGI ->  "  << "sub, ieta, iphi, depth = "  <<  sub << ", " << ieta << ", " << iphi << ", " << depth << std::endl;
+    if (verbosity == -22) std::cout << std::endl << " fillDigiAmplitude     DIGI ->  "  << "sub, ieta, iphi, mdepth = "  <<  sub << ", " << ieta << ", " << iphi << ", " << mdepth << std::endl;
     // !!!!!!
     if (verbosity == -22) std::cout <<" fillDigiAmplitude     Size of Digi "<<(*digiItr).size()<<std::endl;
+    
+
+
     ///////////////////////////////////////Energy
     // Energy:    
     int firstSample  = 2;  // RECO window parameters
@@ -1379,37 +1477,38 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
       //	if(rmsamplitude < -1. || rmsamplitude > 2.025 ) {
       if(rmsamplitude < rmsHBMin_ || rmsamplitude > rmsHBMax_ ) {
 	if (verbosity == -54) std::cout << std::endl << "***BAD HB channels from shape RMS:  "  <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	if(depth==1) h_mapDepth1Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
-	if(depth==2) h_mapDepth2Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
-	if(depth==3) h_mapDepth3Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==1) h_mapDepth1Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==2) h_mapDepth2Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==3) h_mapDepth3Amplitude225_HB->Fill(double(ieta), double(iphi), 1.);
       } 
-      if(depth==1) h_mapDepth1Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);    
-      if(depth==2) h_mapDepth2Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);    
-      if(depth==3) h_mapDepth3Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);  
+      if(mdepth==1) h_mapDepth1Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);    
+      if(mdepth==2) h_mapDepth2Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);    
+      if(mdepth==3) h_mapDepth3Amplitude_HB->Fill(double(ieta), double(iphi), rmsamplitude);  
       
       h_Ampl_HB->Fill(ratio,1.);
       //	if(ratio < 0.4 || ratio > 0.7  ) {
       if(ratio < ratioHBMin_ || ratio > ratioHBMax_  ) {
 	if (verbosity == -53) std::cout << std::endl << "***BAD HB channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	if(depth==1) h_mapDepth1Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
-	if(depth==2) h_mapDepth2Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
-	if(depth==3) h_mapDepth3Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==1) h_mapDepth1Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==2) h_mapDepth2Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==3) h_mapDepth3Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
 	// //
-	badchannels[sub-1][depth-1][ieta+41][iphi] += 1;// 0-82 ; 0-71
+	++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
+	if (verbosity == -51) std::cout << std::endl << "***BAD HB channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	// //
       }
       
-      if(depth==1) h_mapDepth1Ampl_HB->Fill(double(ieta), double(iphi), ratio);    
-      if(depth==2) h_mapDepth2Ampl_HB->Fill(double(ieta), double(iphi), ratio);    
-      if(depth==3) h_mapDepth3Ampl_HB->Fill(double(ieta), double(iphi), ratio);  
+      if(mdepth==1) h_mapDepth1Ampl_HB->Fill(double(ieta), double(iphi), ratio);    
+      if(mdepth==2) h_mapDepth2Ampl_HB->Fill(double(ieta), double(iphi), ratio);    
+      if(mdepth==3) h_mapDepth3Ampl_HB->Fill(double(ieta), double(iphi), ratio);  
       
-      if(depth==1) h_mapDepth1AmplE34_HB->Fill(double(ieta), double(iphi), ampl);    
-      if(depth==2) h_mapDepth2AmplE34_HB->Fill(double(ieta), double(iphi), ampl);    
-      if(depth==3) h_mapDepth3AmplE34_HB->Fill(double(ieta), double(iphi), ampl);  
+      if(mdepth==1) h_mapDepth1AmplE34_HB->Fill(double(ieta), double(iphi), ampl);    
+      if(mdepth==2) h_mapDepth2AmplE34_HB->Fill(double(ieta), double(iphi), ampl);    
+      if(mdepth==3) h_mapDepth3AmplE34_HB->Fill(double(ieta), double(iphi), ampl);  
       
-      if(depth==1) h_mapDepth1_HB->Fill(double(ieta), double(iphi), 1.);    
-      if(depth==2) h_mapDepth2_HB->Fill(double(ieta), double(iphi), 1.);    
-      if(depth==3) h_mapDepth3_HB->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==1) h_mapDepth1_HB->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==2) h_mapDepth2_HB->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==3) h_mapDepth3_HB->Fill(double(ieta), double(iphi), 1.);    
     }//if ( sub == 1 )
     // HE
     if ( sub == 2 ) {
@@ -1419,36 +1518,37 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
       //	if(rmsamplitude < -1. || rmsamplitude > 2.225 ) {
       if(rmsamplitude < rmsHEMin_ || rmsamplitude > rmsHEMax_ ) {
 	if (verbosity == -54) std::cout << std::endl << "***BAD HE channels from shape RMS:  " <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	if(depth==1) h_mapDepth1Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
-	if(depth==2) h_mapDepth2Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
-	if(depth==3) h_mapDepth3Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==1) h_mapDepth1Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==2) h_mapDepth2Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==3) h_mapDepth3Amplitude225_HE->Fill(double(ieta), double(iphi), 1.);
       } 
-      if(depth==1) h_mapDepth1Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);    
-      if(depth==2) h_mapDepth2Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);    
-      if(depth==3) h_mapDepth3Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);  
+      if(mdepth==1) h_mapDepth1Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);    
+      if(mdepth==2) h_mapDepth2Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);    
+      if(mdepth==3) h_mapDepth3Amplitude_HE->Fill(double(ieta), double(iphi), rmsamplitude);  
       
       h_Ampl_HE->Fill(ratio,1.);
       //	if(ratio < 0.3 || ratio > 0.8  ) {
       if(ratio < ratioHEMin_ || ratio > ratioHEMax_  ) {
 	if (verbosity == -53) std::cout << std::endl << "***BAD HE channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	if(depth==1) h_mapDepth1Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
-	if(depth==2) h_mapDepth2Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
-	if(depth==3) h_mapDepth3Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==1) h_mapDepth1Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==2) h_mapDepth2Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
+	if(mdepth==3) h_mapDepth3Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
 	// //
-	badchannels[sub-1][depth-1][ieta+41][iphi] += 1;// 0-82 ; 0-71
+	++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
+	if (verbosity == -51) std::cout << std::endl << "***BAD HE channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	// //
       }
-      if(depth==1) h_mapDepth1Ampl_HE->Fill(double(ieta), double(iphi), ratio);    
-      if(depth==2) h_mapDepth2Ampl_HE->Fill(double(ieta), double(iphi), ratio);    
-      if(depth==3) h_mapDepth3Ampl_HE->Fill(double(ieta), double(iphi), ratio);  
+      if(mdepth==1) h_mapDepth1Ampl_HE->Fill(double(ieta), double(iphi), ratio);    
+      if(mdepth==2) h_mapDepth2Ampl_HE->Fill(double(ieta), double(iphi), ratio);    
+      if(mdepth==3) h_mapDepth3Ampl_HE->Fill(double(ieta), double(iphi), ratio);  
       
-      if(depth==1) h_mapDepth1AmplE34_HE->Fill(double(ieta), double(iphi), ampl);    
-      if(depth==2) h_mapDepth2AmplE34_HE->Fill(double(ieta), double(iphi), ampl);    
-      if(depth==3) h_mapDepth3AmplE34_HE->Fill(double(ieta), double(iphi), ampl);  
+      if(mdepth==1) h_mapDepth1AmplE34_HE->Fill(double(ieta), double(iphi), ampl);    
+      if(mdepth==2) h_mapDepth2AmplE34_HE->Fill(double(ieta), double(iphi), ampl);    
+      if(mdepth==3) h_mapDepth3AmplE34_HE->Fill(double(ieta), double(iphi), ampl);  
       
-      if(depth==1) h_mapDepth1_HE->Fill(double(ieta), double(iphi), 1.);    
-      if(depth==2) h_mapDepth2_HE->Fill(double(ieta), double(iphi), 1.);    
-      if(depth==3) h_mapDepth3_HE->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==1) h_mapDepth1_HE->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==2) h_mapDepth2_HE->Fill(double(ieta), double(iphi), 1.);    
+      if(mdepth==3) h_mapDepth3_HE->Fill(double(ieta), double(iphi), 1.);    
     }//if ( sub == 2 )
     //    
 }
@@ -1511,58 +1611,82 @@ void VeRawAnalyzer::endJob(){
   
   hOutputFile->Write();   
   hOutputFile->cd();
-  myTree->Write();
+
+  if(recordNtuples_) myTree->Write();
+
   ///////////////////////////////////////////////////////////////////////////////////////////////
   std::cout << "===== full number of events =  " << nevent << std::endl;
   std::cout << "===== full number of events*HBHEdigis =  " << nnnnnn << std::endl;
   std::cout << "===== full number of events*HFdigis =  " << counter << std::endl;
   
   std::cout << "===== Start writing user histograms =====" << std::endl;
-  
+  //////////////////////////////////////////////////////////////////////   scaling of some histoes:
+  /*
+  double ww = 1.;
+  if(nnnnnn1 != 0) ww = 1./nnnnnn1;
+  h_nbadchannels_depth1_HB->Scale(ww);
+
+  ww = 1.;
+  if(nnnnnn2 != 0) ww = 1./nnnnnn2;
+  h_nbadchannels_depth2_HB->Scale(ww);
+
+  ww = 1.;
+  if(nnnnnn3 != 0) ww = 1./nnnnnn3;
+  h_nbadchannels_depth1_HE->Scale(ww);
+
+  ww = 1.;
+  if(nnnnnn4 != 0) ww = 1./nnnnnn4;
+  h_nbadchannels_depth2_HE->Scale(ww);
+
+  ww = 1.;
+  if(nnnnnn5 != 0) ww = 1./nnnnnn5;
+  h_nbadchannels_depth3_HE->Scale(ww);
+*/
   ///////////////////////////////////////////->Write();
-  h_errorGeneral->Write();
-  h_error1->Write();
-  h_error2->Write();
-  h_error3->Write();
-  h_amplError->Write();
-  h_amplFine->Write();
-
-  h_errorGeneral_HB->Write();
-  h_error1_HB->Write();
-  h_error2_HB->Write();
-  h_error3_HB->Write();
-  h_error4_HB->Write();
-  h_error5_HB->Write();
-  h_error6_HB->Write();
-  h_error7_HB->Write();
-  h_amplError_HB->Write();
-  h_amplFine_HB->Write();
-  h_mapDepth1Error_HB->Write();
-  h_mapDepth2Error_HB->Write();
-  h_mapDepth3Error_HB->Write();
-  h_fiber0_HB->Write();
-  h_fiber1_HB->Write();
-  h_fiber2_HB->Write();
-  h_repetedcapid_HB->Write();
-
-  h_errorGeneral_HE->Write();
-  h_error1_HE->Write();
-  h_error2_HE->Write();
-  h_error3_HE->Write();
-  h_error4_HE->Write();
-  h_error5_HE->Write();
-  h_error6_HE->Write();
-  h_error7_HE->Write();
-  h_amplError_HE->Write();
-  h_amplFine_HE->Write();
-  h_mapDepth1Error_HE->Write();
-  h_mapDepth2Error_HE->Write();
-  h_mapDepth3Error_HE->Write();
-  h_fiber0_HE->Write();
-  h_fiber1_HE->Write();
-  h_fiber2_HE->Write();
-  h_repetedcapid_HE->Write();
-
+  if(recordHistoes_) {
+    h_errorGeneral->Write();
+    h_error1->Write();
+    h_error2->Write();
+    h_error3->Write();
+    h_amplError->Write();
+    h_amplFine->Write();
+    
+    h_errorGeneral_HB->Write();
+    h_error1_HB->Write();
+    h_error2_HB->Write();
+    h_error3_HB->Write();
+    h_error4_HB->Write();
+    h_error5_HB->Write();
+    h_error6_HB->Write();
+    h_error7_HB->Write();
+    h_amplError_HB->Write();
+    h_amplFine_HB->Write();
+    h_mapDepth1Error_HB->Write();
+    h_mapDepth2Error_HB->Write();
+    h_mapDepth3Error_HB->Write();
+    h_fiber0_HB->Write();
+    h_fiber1_HB->Write();
+    h_fiber2_HB->Write();
+    h_repetedcapid_HB->Write();
+    
+    h_errorGeneral_HE->Write();
+    h_error1_HE->Write();
+    h_error2_HE->Write();
+    h_error3_HE->Write();
+    h_error4_HE->Write();
+    h_error5_HE->Write();
+    h_error6_HE->Write();
+    h_error7_HE->Write();
+    h_amplError_HE->Write();
+    h_amplFine_HE->Write();
+    h_mapDepth1Error_HE->Write();
+    h_mapDepth2Error_HE->Write();
+    h_mapDepth3Error_HE->Write();
+    h_fiber0_HE->Write();
+    h_fiber1_HE->Write();
+    h_fiber2_HE->Write();
+    h_repetedcapid_HE->Write();
+    
     ///////////////////////
     h_Amplitude_HB->Write();
     h_mapDepth1Amplitude225_HB->Write();
@@ -1627,32 +1751,42 @@ void VeRawAnalyzer::endJob(){
 
     h_nbadchannels_depth1_HB->Write();
     h_runnbadchannels_depth1_HB->Write();
-    h_badrate_depth1_HB->Write();
     h_runbadrate_depth1_HB->Write();
+    h_runbadrate1_depth1_HB->Write();
+    h_runbadrate2_depth1_HB->Write();
+    h_runbadrate3_depth1_HB->Write();
     h_runbadrate0_depth1_HB->Write();
 
     h_nbadchannels_depth2_HB->Write();
     h_runnbadchannels_depth2_HB->Write();
-    h_badrate_depth2_HB->Write();
     h_runbadrate_depth2_HB->Write();
+    h_runbadrate1_depth2_HB->Write();
+    h_runbadrate2_depth2_HB->Write();
+    h_runbadrate3_depth2_HB->Write();
     h_runbadrate0_depth2_HB->Write();
 
     h_nbadchannels_depth1_HE->Write();
     h_runnbadchannels_depth1_HE->Write();
-    h_badrate_depth1_HE->Write();
     h_runbadrate_depth1_HE->Write();
+    h_runbadrate1_depth1_HE->Write();
+    h_runbadrate2_depth1_HE->Write();
+    h_runbadrate3_depth1_HE->Write();
     h_runbadrate0_depth1_HE->Write();
 
     h_nbadchannels_depth2_HE->Write();
     h_runnbadchannels_depth2_HE->Write();
-    h_badrate_depth2_HE->Write();
     h_runbadrate_depth2_HE->Write();
+    h_runbadrate1_depth2_HE->Write();
+    h_runbadrate2_depth2_HE->Write();
+    h_runbadrate3_depth2_HE->Write();
     h_runbadrate0_depth2_HE->Write();
 
     h_nbadchannels_depth3_HE->Write();
     h_runnbadchannels_depth3_HE->Write();
-    h_badrate_depth3_HE->Write();
     h_runbadrate_depth3_HE->Write();
+    h_runbadrate1_depth3_HE->Write();
+    h_runbadrate2_depth3_HE->Write();
+    h_runbadrate3_depth3_HE->Write();
     h_runbadrate0_depth3_HE->Write();
     ///////////////////////
 
@@ -1673,11 +1807,12 @@ void VeRawAnalyzer::endJob(){
     h_mapRatioCalib_HF->Write();
     h_map_HF->Write();
     ///////////////////////
-    ///////////////////////
+  }//if
+  ///////////////////////
   hOutputFile->Close() ;
-  std::cout << "===== Finish writing user histograms =====" << std::endl;
-    ///////////////////////
-
+  std::cout << "===== Finish writing user histograms and ntuple =====" << std::endl;
+  ///////////////////////
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
