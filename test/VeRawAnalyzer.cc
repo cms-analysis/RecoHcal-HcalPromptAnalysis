@@ -128,6 +128,7 @@ private:
 
   bool recordNtuples_;
   bool recordHistoes_;
+  bool studyRunDependenceHist_;
 
   double ratioHBMin_;
   double ratioHBMax_;
@@ -382,6 +383,7 @@ VeRawAnalyzer::VeRawAnalyzer(const edm::ParameterSet& iConfig)
   //
   recordNtuples_=iConfig.getUntrackedParameter<bool>("recordNtuples");
   recordHistoes_=iConfig.getUntrackedParameter<bool>("recordHistoes");
+  studyRunDependenceHist_=iConfig.getUntrackedParameter<bool>("studyRunDependenceHist"); 
   //
   ratioHBMin_      = iConfig.getParameter<double>("ratioHBMin");//
   ratioHBMax_      = iConfig.getParameter<double>("ratioHBMax");//
@@ -400,14 +402,30 @@ VeRawAnalyzer::VeRawAnalyzer(const edm::ParameterSet& iConfig)
   calibratioHEMin_ = iConfig.getParameter<double>("calibratioHEMin");//
   calibratioHOMin_ = iConfig.getParameter<double>("calibratioHOMin");//
   calibratioHFMin_ = iConfig.getParameter<double>("calibratioHFMin");//
-
   //
   fOutputFileName = iConfig.getUntrackedParameter<std::string>("HistOutFile"); 
   // inputTag_ = iConfig.getUntrackedParameter<edm::InputTag>("DigiCollectionLabel");
-  //  allowMissingInputs_=iConfig.getUntrackedParameter<bool>("AllowMissingInputs",false);
   
+  std::cout<<" Look on parameters you booked:" << std::endl;   
   std::cout<<" recordNtuples_ = " <<recordNtuples_ << std::endl;   
-  std::cout<<" recordHistoes_ = " <<recordHistoes_ << std::endl;   
+  std::cout<<" recordHistoes_ = " <<recordHistoes_ << std::endl; 
+  std::cout<<" studyRunDependenceHist_ = " <<studyRunDependenceHist_ << std::endl; 
+  std::cout<<" ratioHBMin_ = " <<ratioHBMin_ << std::endl;   
+  std::cout<<" ratioHBMax_ = " <<ratioHBMax_ << std::endl;   
+  std::cout<<" ratioHEMin_ = " <<ratioHEMin_ << std::endl;   
+  std::cout<<" ratioHEMax_ = " <<ratioHEMax_ << std::endl;   
+  std::cout<<" nbadchannels1_ = " <<nbadchannels1_ << std::endl;   
+  std::cout<<" nbadchannels2_ = " <<nbadchannels2_ << std::endl;   
+  std::cout<<" nbadchannels3_ = " <<nbadchannels3_ << std::endl;   
+  std::cout<<" rmsHBMin_ = " <<rmsHBMin_ << std::endl;   
+  std::cout<<" rmsHBMax_ = " <<rmsHBMax_ << std::endl;   
+  std::cout<<" rmsHEMin_ = " <<rmsHEMin_ << std::endl;   
+  std::cout<<" rmsHEMax_ = " <<rmsHEMax_ << std::endl;   
+  std::cout<<" calibratioHBMin_ = " <<calibratioHBMin_ << std::endl;   
+  std::cout<<" calibratioHEMin_ = " <<calibratioHEMin_ << std::endl;   
+  std::cout<<" calibratioHOMin_ = " <<calibratioHOMin_ << std::endl;   
+  std::cout<<" calibratioHFMin_ = " <<calibratioHFMin_ << std::endl;   
+  
   //
   lumi=0;
   numOfLaserEv=0;
@@ -516,12 +534,16 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	signal3[k1][k2][k3] = 0.;
 	calib3[k1][k2][k3] = 0.;
 	calib2[k1][k2][k3] = 0.;
-	for(int k0 = 0; k0<4; k0++) {
-	  badchannels[k0][k1][k2][k3] = 0;
-	}  
-      }  
-    }  
-  }  
+
+	if(studyRunDependenceHist_) {
+	  for(int k0 = 0; k0<4; k0++) {
+	    badchannels[k0][k1][k2][k3] = 0;
+	  }//for
+	}//if
+	
+      }//for  
+    }//for  
+  }//for  
   /////////////////////////////////////////////// HFDigiCollection
   edm::Handle<HFDigiCollection> hf;
   iEvent.getByType(hf);
@@ -579,21 +601,21 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     for(HBHEDigiCollection::const_iterator digi=hbhe->begin();digi!=hbhe->end();digi++)
       {
 	eta=digi->id().ieta(); phi=digi->id().iphi(); depth=digi->id().depth(); nTS=digi->size();      
-
-    /////////////////////////////////////// counters of event*digis
-    nnnnnn++;    
-    if(digi->id().subdet()==HcalBarrel && depth == 1) nnnnnn1++;    
-    if(digi->id().subdet()==HcalBarrel && depth == 2) nnnnnn2++;    
-    if(digi->id().subdet()==HcalEndcap && depth == 1) nnnnnn3++;    
-    if(digi->id().subdet()==HcalEndcap && depth == 2) nnnnnn4++;    
-    if(digi->id().subdet()==HcalEndcap && depth == 3) nnnnnn5++;    
-
-////////////////////////////////////////////////////////////  for zerrors.C script:
+	
+	/////////////////////////////////////// counters of event*digis
+	nnnnnn++;    
+	if(digi->id().subdet()==HcalBarrel && depth == 1) nnnnnn1++;    
+	if(digi->id().subdet()==HcalBarrel && depth == 2) nnnnnn2++;    
+	if(digi->id().subdet()==HcalEndcap && depth == 1) nnnnnn3++;    
+	if(digi->id().subdet()==HcalEndcap && depth == 2) nnnnnn4++;    
+	if(digi->id().subdet()==HcalEndcap && depth == 3) nnnnnn5++;    
+	
+	////////////////////////////////////////////////////////////  for zerrors.C script:
 	if(recordHistoes_) fillDigiErrors(digi); 
-////////////////////////////////////////////////////////////  for zratio34.C,zrms.C & zdifampl.C scripts:
-        if(recordHistoes_) fillDigiAmplitude(digi); 
-	if(recordHistoes_) {
-	  ////////////////////////////////////////////////////////////////  for zRunRatio34.C script:
+	///////////////////////////////////////////////////  for zratio34.C,zrms.C & zdifampl.C scripts:
+	if(recordHistoes_) fillDigiAmplitude(digi); 
+	///////////////////////////////////////////////////  for zRunRatio34.C & zRunNbadchan.C scripts:
+	if(recordHistoes_ && studyRunDependenceHist_) {
 	  //////////// k0(sub): =0 HB; =1 HE; =2 HO; =2 HF;
 	  //////////// k1(depth+1): = 1 - 4 ;
 	  for(int k0 = 0; k0<4; k0++) {
@@ -1493,7 +1515,7 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
 	if(mdepth==2) h_mapDepth2Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
 	if(mdepth==3) h_mapDepth3Ampl047_HB->Fill(double(ieta), double(iphi), 1.);
 	// //
-	++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
+	if(studyRunDependenceHist_) ++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
 	if (verbosity == -51) std::cout << std::endl << "***BAD HB channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	// //
       }
@@ -1534,7 +1556,7 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
 	if(mdepth==2) h_mapDepth2Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
 	if(mdepth==3) h_mapDepth3Ampl047_HE->Fill(double(ieta), double(iphi), 1.);
 	// //
-	++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
+	if(studyRunDependenceHist_) ++badchannels[sub-1][mdepth-1][ieta+41][iphi];// 0-82 ; 0-71
 	if (verbosity == -51) std::cout << std::endl << "***BAD HE channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	// //
       }
