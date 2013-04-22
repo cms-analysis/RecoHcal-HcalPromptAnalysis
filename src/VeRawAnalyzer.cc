@@ -11,7 +11,7 @@ Implementation:
 <Notes on implementation>
 */
 //
-// $Id: VeRawAnalyzer.cc,v 1.7 2013/04/15 11:07:12 zhokin Exp $
+// $Id: VeRawAnalyzer.cc,v 1.8 2013/04/17 14:22:48 zhokin Exp $
 //
 
 // system include files
@@ -1033,19 +1033,8 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 //      // for All HF histoes:
 //      if(depth==1) h_mapDepth1_HF->Fill(double(ieta), double(iphi), 1.);    
 //      if(depth==2) h_mapDepth2_HF->Fill(double(ieta), double(iphi), 1.);    
-
-      if(eta == 29&&phi==1 && verbosity > 0) std::cout<<" 29 eta HF "<<depth<<std::endl;    
-      /*
-	for(int i=0; i<10; i++) TS_data[i]=0;
-	for(int i=0;i<nTS;i++) TS_data[i]=adc2fC[digi->sample(i).adc()];
-	//for(int i=nTS;i<numOfTS;i++) TS_data[i]=0;
-	cap_num= digi->sample(0).capid();
-	//if(Noise_data_status)
-	{
-	TS_shape(3);
-	//Noise_data(3); 
-	}  
-      */
+//      if(eta == 29&&phi==1 && verbosity > 0) std::cout<<" 29 eta HF "<<depth<<std::endl; 
+   
     }   
   }
 
@@ -1110,6 +1099,7 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	    {                 
 	      if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
 		TS_data[i]=adc2fC[digi->sample(i).adc()];
+// Note: ieta+-15 and +-16 are treated for HB separately.
 		if(abs(eta) == 15 || abs(eta) == 16) {
 		  if(eta == 15) hb15[1][depth-1][phi-1][i] = TS_data[i];
 		  if(eta == 16) hb16[1][depth-1][phi-1][i] = TS_data[i];
@@ -1120,8 +1110,9 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 		}
 	      }
 	      
-	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
-	      if(eta == 15&&phi==1 && verbosity > 0 ) std::cout<<" 15 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+//	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+//	      if(eta == 15&&phi==1 && verbosity > 0 ) std::cout<<" 15 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+
 	    } 
 	  
 	  if(digi->id().subdet()==HcalEndcap)
@@ -1129,6 +1120,8 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	      if(nTS<=numOfTS) for(int i=0;i<nTS;i++) {
 		TS_data[i]=adc2fC[digi->sample(i).adc()];
 		if( abs(eta) == 16 ) {
+// Note: eta +-16 is treated for HE separately
+// For eta +-16 there is one depth in HE (behind 2 HB depths): 3 depths in HBHE in total
 		  if(eta == 16) he16[1][0][phi-1][i] = TS_data[i];
 		  if(eta == -16) he16[0][0][phi-1][i] = TS_data[i];
 		} else {
@@ -1139,8 +1132,8 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 		  he[jeta][depth-1][phi-1][i] = TS_data[i];
 		}
 	      } 
-	      if(eta == 29&&phi==1 && verbosity > 0 ) std::cout<<" 29 eta HE "<<depth<<std::endl;
-	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
+//	      if(eta == 29&&phi==1 && verbosity > 0 ) std::cout<<" 29 eta HE "<<depth<<std::endl;
+//	      if(eta == 16&&phi==1 && verbosity > 0 ) std::cout<<" 16 eta "<<depth<<" "<<digi->id().subdet()<<std::endl;
 	    }// HcalEndcap                                                                    
 	  
 	}//if(recordNtuples_)
@@ -1180,14 +1173,6 @@ void VeRawAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 //	if(i>1&&i<6) signal3[2][ieta+41][iphi] += TS_data[i];
       }//if for
 
-      /*
-      if(studyDiffAmplHist_) {
-	if(depth==4) h_mapDepth4AmplE34_HO->Fill(double(ieta), double(iphi), amplitude);    
-      }//if(studyDiffAmplHist_)
-      
-      // for All histoes of HO
-      if(depth==4) h_mapDepth4_HO->Fill(double(ieta), double(iphi), 1.); 
-*/
    
     }//for HODigiCollection
   }//ho.isValid(
@@ -2237,26 +2222,15 @@ void VeRawAnalyzer::fillDigiErrors(HBHEDigiCollection::const_iterator& digiItr)
     if( anyer && !anydv)                        error7 = 1; 
     ///////////////////////////////////////Energy
     // Energy:    
-    //    int firstSample  = 1;  // RECO window parameters
-    //    int samplesToAdd = 9;
-    int firstSample  = 2;  // RECO window parameters
-    int samplesToAdd = 2;
-    
-    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-    HcalCoderDb coder (*channelCoder, *shape);
-    coder.adc2fC(*digiItr,tool);
-    if (verbosity == -22) std::cout << "coder done..." << std::endl;
+
     double ampl = 0.;
-    for (int ii=0; ii<tool.size(); ii++) {  
-      int capid = ((*digiItr)[ii]).capid();
-      double ta = (tool[ii]-calib.pedestal(capid)); // pedestal subtraction
-      ta*= calib.respcorrgain(capid) ;   // fC --> GeV
-      if (ii >= firstSample && ii < firstSample+samplesToAdd )  ampl+=ta;  
+    for (int ii=0; ii<10; ii++) {  
+      double ampldefault = adc2fC[digiItr->sample(ii).adc()];
+      ampl+=ampldefault;// fC
     }
+
     if (verbosity == -22) std::cout << std::endl << "*** E = " << ampl 
 				 << "   ACD -> fC -> (gain ="
-				 << calib.respcorrgain(0) << ") GeV (ped.subtracted)" 
 				 << std::endl;
     
     ///////////////////////////////////////Digis
@@ -2412,26 +2386,17 @@ void VeRawAnalyzer::fillDigiErrorsHF(HFDigiCollection::const_iterator& digiItr)
     if( anyer && !anydv)                        error7 = 1; 
     ///////////////////////////////////////Energy
     // Energy:    
-//    int firstSample  = 1;  // RECO window parameters
-//    int samplesToAdd = 9;
-    int firstSample  = 2;  // RECO window parameters
-    int samplesToAdd = 2;
 
-    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-    HcalCoderDb coder (*channelCoder, *shape);
-    coder.adc2fC(*digiItr,tool);
-    if (verbosity == -22) std::cout << "coder done..." << std::endl;
+
     double ampl = 0.;
-    for (int ii=0; ii<tool.size(); ii++) {  
-      int capid = ((*digiItr)[ii]).capid();
-      double ta = (tool[ii]-calib.pedestal(capid)); // pedestal subtraction
-      ta*= calib.respcorrgain(capid) ;   // fC --> GeV
-      if (ii >= firstSample && ii < firstSample+samplesToAdd )  ampl+=ta;  
+    for (int ii=0; ii<10; ii++) {  
+      double ampldefault = adc2fC[digiItr->sample(ii).adc()];
+      ampl+=ampldefault;// fC
     }
+
+
     if (verbosity == -22) std::cout << std::endl << "*** E = " << ampl 
 				 << "   ACD -> fC -> (gain ="
-				 << calib.respcorrgain(0) << ") GeV (ped.subtracted)" 
 				 << std::endl;
     
     ///////////////////////////////////////Digis
@@ -2567,26 +2532,13 @@ void VeRawAnalyzer::fillDigiErrorsHO(HODigiCollection::const_iterator& digiItr)
     if( anyer && !anydv)                        error7 = 1; 
     ///////////////////////////////////////Energy
     // Energy:    
-//    int firstSample  = 1;  // RECO window parameters
-//    int samplesToAdd = 9;
-    int firstSample  = 2;  // RECO window parameters
-    int samplesToAdd = 2;
-
-    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-    HcalCoderDb coder (*channelCoder, *shape);
-    coder.adc2fC(*digiItr,tool);
-    if (verbosity == -22) std::cout << "coder done..." << std::endl;
-    double ampl = 0.;
-    for (int ii=0; ii<tool.size(); ii++) {  
-      int capid = ((*digiItr)[ii]).capid();
-      double ta = (tool[ii]-calib.pedestal(capid)); // pedestal subtraction
-      ta*= calib.respcorrgain(capid) ;   // fC --> GeV
-      if (ii >= firstSample && ii < firstSample+samplesToAdd )  ampl+=ta;  
+     double ampl = 0.;
+    for (int ii=0; ii<10; ii++) {  
+      double ampldefault = adc2fC[digiItr->sample(ii).adc()];
+      ampl+=ampldefault;// fC
     }
-    if (verbosity == -22) std::cout << std::endl << "*** E = " << ampl 
+   if (verbosity == -22) std::cout << std::endl << "*** E = " << ampl 
 				 << "   ACD -> fC -> (gain ="
-				 << calib.respcorrgain(0) << ") GeV (ped.subtracted)" 
 				 << std::endl;
     
     ///////////////////////////////////////Digis
@@ -2636,12 +2588,7 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
     
     ///////////////////////////////////////Energy
     // Energy:    
-//    int firstSample  = 2;  // RECO window parameters
-//    int samplesToAdd = 2;
-////    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-//    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-//    HcalCoderDb coder (*channelCoder, *shape);
-//    coder.adc2fC(*digiItr,tool);
+
     if (verbosity == -22) std::cout << "fillDigiAmplitude    coder done..." << std::endl;
     double amplitude = 0.;
 //    double amplallTS = 0.;
@@ -2653,26 +2600,18 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
     for (int ii=0; ii<10; ii++) {  
       double ampldefault = adc2fC[digiItr->sample(ii).adc()];
       tool[ii] = ampldefault;
-      //      double ampldefault = tool[ii];
-      //      double ampltool = tool[ii];
-      ////      if (verbosity == -22) std::cout << "fillDigiAmplitude    ampldefault = " << ampldefault << " ampltool = " << ampltool << std::endl;
-      //      int capid = ((*digiItr)[ii]).capid();
-      //      double pedestal = calib.pedestal(capid);
-      //      double ta = (ampltool-pedestal); // pedestal subtraction
-      //      double calibrespcorrgain = calib.respcorrgain(capid) ;   // fC --> GeV
-      //      if (verbosity == -22) std::cout << "fillDigiAmplitude    pedestal = " << pedestal << " calibrespcorrgain = " << calibrespcorrgain << std::endl;
-      //      ta*= calibrespcorrgain;
-      //      if(ts_with_max_signal < calibrespcorrgain ) ts_with_max_signal = calibrespcorrgain;
+
       if(max_signal < ampldefault ) {
 	max_signal = ampldefault;
 	ts_with_max_signal = ii;
       }
       amplitude+=ampldefault;// fC
-      //      amplallTS+=ta;// GeV
-      //      if (ii >= firstSample && ii < firstSample+samplesToAdd )  ampl+=ta; // GeV 
+
+
       if (verbosity == -22) std::cout << "fillDigiAmplitude    amplitude = " << amplitude << std::endl;
       timew += (ii+1)*ampldefault;
     }//for 1
+
 //    if (verbosity == -22) std::cout << std::endl << "*** E = " << ampl << "   ACD -> fC -> (gain ="<< calib.respcorrgain(0) << ") GeV (ped.subtracted)" << std::endl;
     // ------------ to get signal in TS: -2 max +1  ------------
 
@@ -2685,12 +2624,18 @@ void VeRawAnalyzer::fillDigiAmplitude(HBHEDigiCollection::const_iterator& digiIt
     if(amplitude != 0. ) ratio = ampl/amplitude;
     if (verbosity == -22 && (ratio<0. || ratio>1.02)) {
       
-      std::cout << " ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal<< " tool.size() ="<<tool.size()<< " max_signal ="<<max_signal<< std::endl;
+      std::cout << " ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal<< " tool.size() ="
+                                      <<tool.size()<< " max_signal ="<<max_signal<< std::endl;
       
-      std::cout << " tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << tool[ts_with_max_signal-2]  << std::endl;
+      std::cout << " tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  
+                << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << tool[ts_with_max_signal-2]  
+               << std::endl;
       
-      std::cout << " tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  << "  tool[4]= " << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << "  tool[8]= " << tool[8]  << "  tool[9]= " << tool[9]  << std::endl;
+      std::cout << " tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  << "  tool[4]= " 
+                << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << "  tool[8]= " << tool[8]  
+                << "  tool[9]= " << tool[9]  << std::endl;
     }
+
     if (ratio<0. || ratio>1.02) ratio = 0.;
     
     if (verbosity == -22) std::cout << "* ratio = " <<ratio<< " ampl ="<<ampl<< std::endl;
@@ -2942,12 +2887,7 @@ void VeRawAnalyzer::fillDigiAmplitudeHF(HFDigiCollection::const_iterator& digiIt
 
     ///////////////////////////////////////Energy
     // Energy:    
-//    int firstSample  = 2;  // RECO window parameters
-//    int samplesToAdd = 2;
-////    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-//    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-//    HcalCoderDb coder (*channelCoder, *shape);
-//    coder.adc2fC(*digiItr,tool);
+
     if (verbosity == -23) std::cout << "fillDigiAmplitude HF   coder done..." << std::endl;
     double amplitude = 0.;
 //    double amplallTS = 0.;
@@ -2959,26 +2899,17 @@ void VeRawAnalyzer::fillDigiAmplitudeHF(HFDigiCollection::const_iterator& digiIt
     for (int ii=0; ii<10; ii++) {  
       double ampldefault = adc2fC[digiItr->sample(ii).adc()];
       tool[ii] = ampldefault;
-      //      double ampldefault = tool[ii];
-      //      double ampltool = tool[ii];
-      ////      if (verbosity == -23) std::cout << "fillDigiAmplitude    ampldefault = " << ampldefault << " ampltool = " << ampltool << std::endl;
-      //      int capid = ((*digiItr)[ii]).capid();
-      //      double pedestal = calib.pedestal(capid);
-      //      double ta = (ampltool-pedestal); // pedestal subtraction
-      //      double calibrespcorrgain = calib.respcorrgain(capid) ;   // fC --> GeV
-      //      if (verbosity == -23) std::cout << "fillDigiAmplitude    pedestal = " << pedestal << " calibrespcorrgain = " << calibrespcorrgain << std::endl;
-      //      ta*= calibrespcorrgain;
-      //      if(ts_with_max_signal < calibrespcorrgain ) ts_with_max_signal = calibrespcorrgain;
+
       if(max_signal < ampldefault ) {
 	max_signal = ampldefault;
 	ts_with_max_signal = ii;
       }
       amplitude+=ampldefault;// fC
-      //      amplallTS+=ta;// GeV
-      //      if (ii >= firstSample && ii < firstSample+samplesToAdd )  ampl+=ta; // GeV 
+
       if (verbosity == -23) std::cout << "fillDigiAmplitude    amplitude = " << amplitude << std::endl;
       timew += (ii+1)*ampldefault;
     }//for 1
+
 //    if (verbosity == -23) std::cout << std::endl << "*** E = " << ampl << "   ACD -> fC -> (gain ="<< calib.respcorrgain(0) << ") GeV (ped.subtracted)" << std::endl;
     // ------------ to get signal in TS: -2 max +1  ------------
 
@@ -2991,12 +2922,18 @@ void VeRawAnalyzer::fillDigiAmplitudeHF(HFDigiCollection::const_iterator& digiIt
     if(amplitude != 0. ) ratio = ampl/amplitude;
     if (verbosity == -23 && (ratio<0. || ratio>1.02)) {
       
-      std::cout << "HF ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal<< " tool.size() ="<<tool.size()<< " max_signal ="<<max_signal<< std::endl;
+      std::cout << "HF ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal
+                                 << " tool.size() ="<<tool.size()<< " max_signal ="<<max_signal<< std::endl;
       
-      std::cout << "HF tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << tool[ts_with_max_signal-2]  << std::endl;
+      std::cout << "HF tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  
+                << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << 
+                  tool[ts_with_max_signal-2]  << std::endl;
       
-      std::cout << "HF tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  << "  tool[4]= " << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << "  tool[8]= " << tool[8]  << "  tool[9]= " << tool[9]  << std::endl;
+      std::cout << "HF tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  
+                << "  tool[4]= " << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << 
+                   "  tool[8]= " << tool[8]  << "  tool[9]= " << tool[9]  << std::endl;
     }
+
     if (ratio<0. || ratio>1.02) ratio = 0.;
     
     if (verbosity == -23) std::cout << "*HF ratio = " <<ratio<< " ampl ="<<ampl<< std::endl;
@@ -3090,7 +3027,8 @@ void VeRawAnalyzer::fillDigiAmplitudeHF(HFDigiCollection::const_iterator& digiIt
 	  if(mdepth==2) h_mapDepth2Ampl047_HF->Fill(double(ieta), double(iphi), 1.);
 	  // //
 	  if (verbosity == -53) std::cout << "***BAD HF channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	  if (verbosity == -51  ) std::cout << "***BAD HF channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
+	  if (verbosity == -51  ) std::cout << "***BAD HF channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi 
+                      <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	}//if(studyRatioShapeHist_)
       }//if(ratio
       // for averaged values:
@@ -3139,15 +3077,10 @@ void VeRawAnalyzer::fillDigiAmplitudeHO(HODigiCollection::const_iterator& digiIt
 
     ///////////////////////////////////////Energy
     // Energy:    
-//    int firstSample  = 2;  // RECO window parameters
-//    int samplesToAdd = 2;
-////    HcalCalibrations calib = conditions->getHcalCalibrations(cell);
-//    const HcalQIECoder* channelCoder = conditions->getHcalCoder(cell);
-//    HcalCoderDb coder (*channelCoder, *shape);
-//    coder.adc2fC(*digiItr,tool);
+
     if (verbosity == -24) std::cout << "fillDigiAmplitude HO   coder done..." << std::endl;
     double amplitude = 0.;
-//    double amplallTS = 0.;
+
     double ampl = 0.;
     double timew = 0.;
     double max_signal = 0.;
@@ -3157,16 +3090,7 @@ void VeRawAnalyzer::fillDigiAmplitudeHO(HODigiCollection::const_iterator& digiIt
       double ampldefault = adc2fC[digiItr->sample(ii).adc()];
       tool[ii] = ampldefault;
       if (verbosity == -24) std::cout << " ii = " << ii << "HO ampldefault = " << ampldefault << " tool[ii] = " << tool[ii] << std::endl;
-      //      double ampldefault = tool[ii];
-      //      double ampltool = tool[ii];
-      ////      if (verbosity == -24) std::cout << "fillDigiAmplitude    ampldefault = " << ampldefault << " ampltool = " << ampltool << std::endl;
-      //      int capid = ((*digiItr)[ii]).capid();
-      //      double pedestal = calib.pedestal(capid);
-      //      double ta = (ampltool-pedestal); // pedestal subtraction
-      //      double calibrespcorrgain = calib.respcorrgain(capid) ;   // fC --> GeV
-      //      if (verbosity == -24) std::cout << "fillDigiAmplitude    pedestal = " << pedestal << " calibrespcorrgain = " << calibrespcorrgain << std::endl;
-      //      ta*= calibrespcorrgain;
-      //      if(ts_with_max_signal < calibrespcorrgain ) ts_with_max_signal = calibrespcorrgain;
+
       if(max_signal < ampldefault ) {
 	max_signal = ampldefault;
 	ts_with_max_signal = ii;
@@ -3190,11 +3114,16 @@ void VeRawAnalyzer::fillDigiAmplitudeHO(HODigiCollection::const_iterator& digiIt
 //    if (verbosity == -244 && (ratio<0. || ratio>1.02 || ratio==0.)) {
     if (verbosity == -244 && (ratio<0. || ratio>1.02 )) {
       
-      std::cout << "HO ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal<< " tool.size() ="<<tool.size()<< " max_signal ="<<max_signal<< std::endl;
+      std::cout << "HO ratio = " <<ratio<< " ampl ="<<ampl<<" amplitude ="<<amplitude<< " ts_with_max_signal ="<<ts_with_max_signal
+                 << " tool.size() ="<<tool.size()<< " max_signal ="<<max_signal<< std::endl;
       
-      std::cout << "HO tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << tool[ts_with_max_signal-2]  << std::endl;
+      std::cout << "HO tool[ts_with_max_signal] = " << tool[ts_with_max_signal]  << "  tool[ts_with_max_signal+1]= " << tool[ts_with_max_signal+1]  
+                << "  tool[ts_with_max_signal-1]= " << tool[ts_with_max_signal-1]  << "  tool[ts_with_max_signal-2]= " << tool[ts_with_max_signal-2]  
+                << std::endl;
       
-      std::cout << "HO tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  << "  tool[4]= " << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << "  tool[8]= " << tool[8]  << "  tool[9]= " << tool[9]  << std::endl;
+      std::cout << "HO tool[0] = " << tool[0]  << "  tool[1]= " << tool[1]  << "  tool[2]= " << tool[2]  << "  tool[3]= " << tool[3]  << "  tool[4]= " 
+                << tool[4]  << "  tool[5]= " << tool[5]  << "  tool[6]= " << tool[6]  << "  tool[7]= " << tool[7]  << "  tool[8]= " << tool[8]  << "  tool[9]= " 
+                << tool[9]  << std::endl;
     }
     if (ratio<0. || ratio>1.04) ratio = 0.;
     
@@ -3280,7 +3209,8 @@ void VeRawAnalyzer::fillDigiAmplitudeHO(HODigiCollection::const_iterator& digiIt
 	  if(mdepth==4) h_mapDepth4Ampl047_HO->Fill(double(ieta), double(iphi), 1.);
 	  // //
 	  if (verbosity == -53) std::cout << "***BAD HO channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi << std::endl;
-	  if (verbosity == -51  ) std::cout << "***BAD HO channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
+	  if (verbosity == -51  ) std::cout << "***BAD HO channels from shape Ratio:  " <<" ieta= " << ieta <<" iphi= " << iphi <<" sub= " 
+                                  << sub <<" mdepth= " << mdepth <<" badchannels= " << badchannels[sub-1][mdepth-1][ieta+41][iphi] << std::endl;
 	}//if(studyRatioShapeHist_)
       }//if(ratio
       // for averaged values:
