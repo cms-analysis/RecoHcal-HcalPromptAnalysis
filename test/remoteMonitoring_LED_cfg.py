@@ -1,64 +1,28 @@
-import FWCore.ParameterSet.Config as cms
+#how to run: cmsRun remoteMonitoring_LED_cfg.py 211659 
+import sys
 
+#runnumber = sys.argv[2][4:-5]
+
+runnumber = sys.argv[2]
+
+print 'RUN = '+runnumber
+print 'Input file = /afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_'+runnumber+'.root'
+print 'Output file = /afs/cern.ch/work/d/dtlisov/private/Monitoring/histos/LED_'+runnumber+'.root'
+
+import FWCore.ParameterSet.Config as cms
 process = cms.Process("testAnalyzer")
 
 process.maxEvents = cms.untracked.PSet(
 #    input = cms.untracked.int32(1000)
-   input = cms.untracked.int32(-1)
-)
+  input = cms.untracked.int32(-1)
+  )
 
 #process.source = cms.Source("PoolSource",
 process.source = cms.Source("HcalTBSource",
     fileNames = cms.untracked.vstring(
-#
-## Laser:
-#     'file:rfiles/USC_211775.root' ## only HF digis 10K
-#     'file:rfiles/USC_211673.root' ## only HBHE digis 10K
-#
-## LED digis 10K:
-     'file:rfiles/USC_194057.root',
-#     'file:rfiles/USC_194124.root',
-#     'file:rfiles/USC_194165.root',
-#     'file:rfiles/USC_194807.root',
-#     'file:rfiles/USC_195172.root',
-     'file:rfiles/USC_195682.root',
-     'file:rfiles/USC_196870.root',
-#     'file:rfiles/USC_198084.root',
-#     'file:rfiles/USC_199392.root',
-#     'file:rfiles/USC_200281.root',
-     'file:rfiles/USC_200707.root',
-     'file:rfiles/USC_201305.root',
-#     'file:rfiles/USC_201571.root',
-#     'file:rfiles/USC_202066.root',
-     'file:rfiles/USC_202341.root',
-     'file:rfiles/USC_203339.root',
-#     'file:rfiles/USC_203536.root',
-     'file:rfiles/USC_204172.root',
-     'file:rfiles/USC_205355.root',
-#     'file:rfiles/USC_205928.root',
-     'file:rfiles/USC_206456.root',
-#     'file:rfiles/USC_207167.root',
-     'file:rfiles/USC_207406.root',
-#     'file:rfiles/USC_207545.root',
-#     'file:rfiles/USC_207914.root',
-#     'file:rfiles/USC_208361.root',
-     'file:rfiles/USC_208565.root',
-#     'file:rfiles/USC_209311.root',
-#     'file:rfiles/USC_209997.root',
-     'file:rfiles/USC_210378.root',
-#     'file:rfiles/USC_211006.root',
-     'file:rfiles/USC_211659.root'
-#before:     
-#     'file:rfiles/USC_195682.root',
-#     'file:rfiles/USC_196870.root',
-#     'file:rfiles/USC_201305.root',
-#     'file:rfiles/USC_202341.root',
-#     'file:rfiles/USC_203339.root',
-#     'file:rfiles/USC_204172.root',
-#     'file:rfiles/USC_205355.root',
-#     'file:rfiles/USC_206456.root'
-#
-   ), 
+#	       'file:/afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_209311.root'
+               'file:/afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_'+runnumber+'.root'
+                ), 
     streams = cms.untracked.vstring(
 		  "HCAL_Trigger",
 		  "HCAL_DCC700","HCAL_DCC701","HCAL_DCC702","HCAL_DCC703","HCAL_DCC704","HCAL_DCC705",
@@ -68,10 +32,11 @@ process.source = cms.Source("HcalTBSource",
 		  "HCAL_DCC724","HCAL_DCC725","HCAL_DCC726","HCAL_DCC727","HCAL_DCC728","HCAL_DCC729",
 		  "HCAL_DCC730","HCAL_DCC731"
 		 )	
-)
+  )
 process.Analyzer = cms.EDAnalyzer("VeRawAnalyzer",
-                                  #
-                                  MapCreation = cms.untracked.int32(1),
+				  #
+				  # 0 - not create, 1 - create
+                                  MapCreation = cms.untracked.int32(0),
                                   #
                                   recordNtuples = cms.untracked.bool(False),
                                   #recordNtuples = cms.untracked.bool(True),
@@ -238,7 +203,7 @@ process.Analyzer = cms.EDAnalyzer("VeRawAnalyzer",
                                   nbadchannels3 = cms.int32(60),
                                   #
                                   #
-                                  HistOutFile = cms.untracked.string('test.root'),
+                                  HistOutFile = cms.untracked.string('/afs/cern.ch/work/d/dtlisov/private/Monitoring/histos/LED_'+runnumber+'.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser178165.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser141849.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser133070.root'),
@@ -253,7 +218,7 @@ process.Analyzer = cms.EDAnalyzer("VeRawAnalyzer",
 process.hcal_db_producer = cms.ESProducer("HcalDbProducer",
     dump = cms.untracked.vstring(''),
     file = cms.untracked.string('')
-)
+  )
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.hcalDigis.FilterDataQuality = cms.bool(False)
 process.hcalDigis.InputLabel = cms.InputTag("source")

@@ -37,14 +37,14 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 //    TFile *hfile= new TFile("GlobalHist.root", "READ");
     string promt = (string) fname;
     string runnumber ="";
-    for (int i=4; i<promt.size()-5 ; i++) runnumber += fname[i];
+    for (int i=promt.size()-11; i<promt.size()-5 ; i++) runnumber += fname[i];
     string refrunnumber ="";
     promt = (string) refname;
-    for (int i=4; i<promt.size()-5 ; i++) refrunnumber += refname[i];
+    for (int i=promt.size()-11; i<promt.size()-5 ; i++) refrunnumber += refname[i];
     
     TFile *hfile= new TFile( fname, "READ");
     TFile *hreffile= new TFile(refname, "READ");
-     //CUTS:    [test][subdetector]                                  ADC amplitude  Am      Width  for Wm             Ratio min cut for Rm       TS mean for TNm      TS max  for TXm
+     //CUTS:    [test][subdetector]                                  ADC amplitude  Am      Width  for Wm             Ratio cut for Rm             TS mean for TNm           TS max  for TXm
     double MIN_M[7][5]={{0., 0.,0.,0.,0.}, {0., 0.,0.,0.,0.},      {0, 70.,70.,40.,300.}, {0, 0.7, 0.7, 0.1, 0.1}, {0, 0.48, 0.48, 0.48, 0.48}, {0, 1.0, 1.0, 1.0, 1.0}, {0, 1.5, 1.5, 0.5, 0.5}};
     double MAX_M[7][5]={{0., 0.,0.,0.,0.}, {0., 0.,0.,0.,0.},   {0, 1E20,1E20,1E20,1E20}, {0, 2.4, 2.4, 2.5, 2.5}, {0, 0.92, 0.92, 1.02, 1.04}, {0, 5.2, 5.2, 4.5, 5.3}, {0, 6.5, 6.5, 6.5, 6.5}};                    
     double MIN_C[7][5]={{0., 0.,0.,0.,0.}, {0., 0.,0.,0.,0.},    {0, 120.,120.,120.,60.}, {0, 1.0, 1.0, 1.0, 0.5}, {0, 0.6 , 0.64, 0.25, 0.25}, {0, 1.0, 1.0, 1.0, 1.0}, {0, 0.5, 0.5, 0.5, 0.5}};
