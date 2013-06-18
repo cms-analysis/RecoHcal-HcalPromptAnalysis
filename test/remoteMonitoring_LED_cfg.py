@@ -1,13 +1,16 @@
-#how to run: cmsRun remoteMonitoring_LED_cfg.py 211659 
+#how to run: cmsRun remoteMonitoring_LED_cfg.py 211659 file:/afs/cern.ch/work/d/dtlisov/private/Monitoring/data /afs/cern.ch/work/d/dtlisov/private/Monitoring/histos
+#how to run: cmsRun remoteMonitoring_LED_cfg.py 211659 /store/group/comm_hcal/USC /afs/cern.ch/work/d/dtlisov/private/Monitoring/histos
 import sys
 
 #runnumber = sys.argv[2][4:-5]
 
 runnumber = sys.argv[2]
+rundir = sys.argv[3]
+histodir = sys.argv[4]
 
 print 'RUN = '+runnumber
-print 'Input file = /afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_'+runnumber+'.root'
-print 'Output file = /afs/cern.ch/work/d/dtlisov/private/Monitoring/histos/LED_'+runnumber+'.root'
+print 'Input file = '+rundir+'/USC_'+runnumber+'.root'
+print 'Output file = '+histodir+'/LED_'+runnumber+'.root'
 
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("testAnalyzer")
@@ -21,7 +24,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("HcalTBSource",
     fileNames = cms.untracked.vstring(
 #	       'file:/afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_209311.root'
-               'file:/afs/cern.ch/work/d/dtlisov/private/Monitoring/data/USC_'+runnumber+'.root'
+#              '/store/group/comm_hcal/USC/USC_212179.root'
+                rundir+'/USC_'+runnumber+'.root'
                 ), 
     streams = cms.untracked.vstring(
 		  "HCAL_Trigger",
@@ -203,7 +207,7 @@ process.Analyzer = cms.EDAnalyzer("VeRawAnalyzer",
                                   nbadchannels3 = cms.int32(60),
                                   #
                                   #
-                                  HistOutFile = cms.untracked.string('/afs/cern.ch/work/d/dtlisov/private/Monitoring/histos/LED_'+runnumber+'.root'),
+                                  HistOutFile = cms.untracked.string(histodir+'/LED_'+runnumber+'.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser178165.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser141849.root'),
 #                                  HistOutFile = cms.untracked.string('testLaser133070.root'),

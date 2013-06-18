@@ -1,8 +1,7 @@
 // How to run:
 //root -b -q -l RemoteMonitoringMAP.C+
-//root -b -q -l 'RemoteMonitoringMAP.C+("test7runs.root","test207167.root")'
-//root -b -q -l 'RemoteMonitoringMAP.C+("test7longrun.root","test204172.root")'
-//root -b -q -l 'RemoteMonitoringMAP.C+("test205355.root","test204172.root")'
+//root -b -q -l 'RemoteMonitoringMAP.C+("/afs/cern.ch/work/d/dtlisov/private/Monitoring/histos/LED_211006.root","/afs/cern.ch/work/d/dtlisov/private/Monitoring/LED_211006.root")'
+
 
 #include "LogEleMapdb.h"
 
@@ -454,7 +453,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
       
 
 //+++++++++++++++++++++++++++++  
-//Test 13 (Wm) Rate of RMS   
+//Test 13 (Wc) Rate of RMS   
 //+++++++++++++++++++++++++++++ 
  
   Map_Ampl[13][1][1] = (TH2F*)hfile->Get("h_mapWidthCalib047_HB");
@@ -472,7 +471,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
   HistAmpl[13][4] = (TH1F*)hfile->Get("h_WidthCalib_HF");
   
   //+++++++++++++++++++++++++++++  
-//Test 14 (Rm) Rate of ratio 4 near max TS/ All TS   
+//Test 14 (Rc) Rate of ratio 4 near max TS/ All TS   
 //+++++++++++++++++++++++++++++
  
   Map_Ampl[14][1][1] = (TH2F*)hfile->Get("h_mapRatioCalib047_HB");
@@ -491,7 +490,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
   HistAmpl[14][4] = (TH1F*)hfile->Get("h_RatioCalib_HF");  
   
 //+++++++++++++++++++++++++++++  
-//Test 15 (TNm) Mean position in 1-8 TS range   
+//Test 15 (TNc) Mean position in 1-8 TS range   
 //+++++++++++++++++++++++++++++
  
   Map_Ampl[15][1][1] = (TH2F*)hfile->Get("h_mapTSmeanCalib047_HB");
@@ -509,7 +508,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
   HistAmpl[15][4] = (TH1F*)hfile->Get("h_TSmeanCalib_HF");
 
 //+++++++++++++++++++++++++++++  
-//Test 16 (TXm) Maximum position in 1-8 TS range   
+//Test 16 (TXc) Maximum position in 1-8 TS range   
 //+++++++++++++++++++++++++++++
  
   Map_Ampl[16][1][1] = (TH2F*)hfile->Get("h_mapTSmaxCalib047_HB");
@@ -971,7 +970,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 		 for (int test=11;test<=16;test++) { //Test: 1-2.E, 2-2.F, etc
                    if (Map_Ampl[test][sub][k]->GetBinContent(i,j) != 0.)  {
 //	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.0) Map_SUB[sub][k]->SetBinContent(i,j,0.3);
-		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.3);
+//		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.3);
 		      if (flag_W == 0) {
 		         NWarn +=1; 
 		         Eta[1][NWarn]=i-41;
@@ -985,6 +984,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 //		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
                   } 
 		} //end test
+
 //Gain stabil
 		 for (int test=21;test<=21;test++) { //Test: 1-2.E, 2-2.F, etc
                    if (Map_Ampl[test][sub][k]->GetBinContent(i,j) > porog[sub])  {
