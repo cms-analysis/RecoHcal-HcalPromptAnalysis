@@ -1448,7 +1448,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      if (sub==3) htmlFile << "<h2> 2.Status HO over all test </h2>"<< std::endl;
      if (sub==4) htmlFile << "<h2> 2.Status HF over all test </h2>"<< std::endl;
      htmlFile << "<h3> 2.A.Channel map for each Depth </h3>"<< std::endl;
-     htmlFile << "<h4> Channel legend: green - good, red - megatile channel bad, yelloy - megatile channel warning, light blue - calibration, dark blue - gain drift, white - not applicable or out of range </h4>"<< std::endl;
+     htmlFile << "<h4> Channel legend: green - channel good, red - channel bad, yelloy - gain drift, white - not applicable or out of range </h4>"<< std::endl;
      if (sub==1) htmlFile << " <img src=\"MAPHB.png\" />" << std::endl;      
      if (sub==2) htmlFile << " <img src=\"MAPHE.png\" />" << std::endl;      
      if (sub==3) htmlFile << " <img src=\"MAPHO.png\" />" << std::endl;      
@@ -1744,7 +1744,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
     
      htmlFile << "<h2> 2. HCAL status over all test and subdetectors </h2>"<< std::endl;   
      htmlFile << "<h3> 2.A. Channel map </h3>"<< std::endl;
-     htmlFile << "<h4> Channel legend: green - good, red - megatile channel bad, yelloy - megatile channel warning, light blue - calibration, dark blue - gain drift, white - not applicable or out of range </h4>"<< std::endl;
+     htmlFile << "<h4> Channel legend: green - channel good, red - channel bad, yelloy - gain drift, white - not applicable or out of range </h4>"<< std::endl;
      htmlFile << " <img src=\"MAP.png\" />" << std::endl;      
      htmlFile << "<br>"<< std::endl;
      
