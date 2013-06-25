@@ -1,9 +1,9 @@
 #!/bin/bash
 
 refnumber='194057'
-WebDir='/afs/cern.ch/user/d/dtlisov/www/RDMweb'
+WebDir='/afs/cern.ch/cms/CAF/CMSALCA/ALCA_HCALCALIB/HCALMONITORING/RDMweb'
 WebSite='http://test-dtlisov.web.cern.ch/test-dtlisov'
-HistoDir='/afs/cern.ch/work/d/dtlisov/private/Monitoring/histos'
+HistoDir='/afs/cern.ch/cms/CAF/CMSALCA/ALCA_HCALCALIB/HCALMONITORING/RDMweb/histos'
 
 # print usage info
 if [[ "$1" == "" ]]; then
@@ -70,9 +70,9 @@ for i in $list ; do
   #processing
   mkdir $WebDir/LED_$runnumber 
   if [ "$1" == "CAF" ]; then
-    cmsRun remoteMonitoring_LED_cfg.py $runnumber $fullSrc $HistoDir
+     cmsRun remoteMonitoring_LED_cfg.py $runnumber $fullSrc $HistoDir
   else
-    cmsRun remoteMonitoring_LED_cfg.py $runnumber file:$fullSrc $HistoDir
+     cmsRun remoteMonitoring_LED_cfg.py $runnumber file:$fullSrc $HistoDir
   fi
   root -b -q -l 'RemoteMonitoringMAP.C+("'$HistoDir'/LED_'$runnumber'.root","'$HistoDir'/LED_'$refnumber'.root")'
   mv *.html $WebDir/LED_$runnumber
@@ -86,7 +86,7 @@ k=0
 #download the file with run information
 wget http://cmshcalweb01.cern.ch/DetDiag/Local_HTML/runlist.html
 cat runlist.html | sed s/\"//g | sed st\>\/t' 'tg | sed sk\<\/td\>kkg | sed sk\<\/a\>kkg | tr '\n' ' ' | awk -F '</tr>' '{for(i=1;i<=NF;i++) printf $i"\n"}' | awk -F '<tr> <td' '{print $2}' | tail -n +4 | sed s/' '/-/g > runlist.tmp
-
+rm runlist.html
 
 #make the html header 
 for i in $(cat list_${dat}); do
@@ -134,6 +134,7 @@ echo '<td class="s'$raw'" align="center">'$type'</td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center">'$Nevents'</td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center">'$date'</td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center">'$time'</td>'>> index_draft.html
+echo '<td class="s'$raw'" align="center">'$refnumber'</td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center"><a href="'$WebSite'/LED_'$runnumber'/MAP.html">LED_'$runnumber'</a></td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center"><a href="'$HTML'">DetDiag_'$runnumber'</a></td>'>> index_draft.html
 echo '<td class="s'$raw'" align="center">OK</td>'>> index_draft.html
@@ -148,7 +149,6 @@ echo `cat footer.txt`>> index_draft.html
 mv index_draft.html $WebDir/index.html 
 
 #delete temp files
-rm runlist.html
 rm runlist.tmp
 rm diff_${dat} 
 rm list_${dat}

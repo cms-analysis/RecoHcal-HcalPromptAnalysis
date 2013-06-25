@@ -36,10 +36,10 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 //    TFile *hfile= new TFile("GlobalHist.root", "READ");
     string promt = (string) fname;
     string runnumber ="";
-    for (int i=promt.size()-11; i<promt.size()-5 ; i++) runnumber += fname[i];
+    for (unsigned int i=promt.size()-11; i<promt.size()-5 ; i++) runnumber += fname[i];
     string refrunnumber ="";
     promt = (string) refname;
-    for (int i=promt.size()-11; i<promt.size()-5 ; i++) refrunnumber += refname[i];
+    for (unsigned int i=promt.size()-11; i<promt.size()-5 ; i++) refrunnumber += refname[i];
     
     TFile *hfile= new TFile( fname, "READ");
     TFile *hreffile= new TFile(refname, "READ");
@@ -393,43 +393,45 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
   Map_Ampl[11][4][2] = (TH2F*)hfile->Get("h_mapCapCalib047_HF"); 
   
   for (int sub=1;sub<=4;sub++) {  //Subdetector: 1-HB, 2-HE, 3-HF, 4-HO
-       if (sub==1) cHB->Divide(2,1);
-       if (sub==2) cHE->Divide(3,1);
-       if (sub==3) cONE->Divide(1,1);
-       if (sub==4) cHB->Divide(2,1);
-       int k_min[5]={0,1,1,4,1}; // minimum depth for each subdet
-       int k_max[5]={0,2,3,4,2}; // maximum depth for each subdet	
-       for (int k=k_min[sub];k<=k_max[sub];k++) {  //Depth 
-            if (sub==1) cHB->cd(k); 
-            if (sub==2) cHE->cd(k);
-	    if (sub==3) cONE->cd(k-3);
-	    if (sub==4) cHB->cd(k);  
+//       if (sub==1) cHB->Divide(2,1);
+//       if (sub==2) cHE->Divide(3,1);
+        cONE->Divide(1,1);
+ //      if (sub==4) cHB->Divide(2,1);
+//       int k_min[5]={0,1,1,4,1}; // minimum depth for each subdet
+//       int k_max[5]={0,2,3,4,2}; // maximum depth for each subdet	
+//       for (int k=k_min[sub];k<=k_max[sub];k++) {  //Depth 
+         int k=1;
+         cONE->cd(k-3);
+//          if (sub==1) cHB->cd(k); 
+//          if (sub==2) cHE->cd(k);
+	    if (sub==3) k=4;;
+//	    if (sub==4) cHB->cd(k);  
             Map_Ampl[11][sub][k]->Divide(Map_Ampl[11][sub][k],Map_Calib[sub][k], 1, 1, "B"); 
             gPad->SetGridy();
             gPad->SetGridx();
             gPad->SetLogz();
-            if (sub==1) sprintf(str,"HB, Depth%d \b", k);
-            if (sub==2) sprintf(str,"HE, Depth%d \b", k);
-            if (sub==3) sprintf(str,"HO, Depth%d \b", k);
-            if (sub==4) sprintf(str,"HF, Depth%d \b", k);  
+            if (sub==1) sprintf(str,"HB");
+            if (sub==2) sprintf(str,"HE");
+            if (sub==3) sprintf(str,"HO");
+            if (sub==4) sprintf(str,"HF");  
             Map_Ampl[11][sub][k]->SetTitle(str);
             Map_Ampl[11][sub][k]->SetXTitle("#eta \b");
             Map_Ampl[11][sub][k]->SetYTitle("#phi \b");
             Map_Ampl[11][sub][k]->SetZTitle("Rate \b");
-	    if (sub==3) Map_Ampl[11][sub][k]->SetTitleOffset(0.8,"Z");
+	    Map_Ampl[11][sub][k]->SetTitleOffset(0.75,"Z");
             Map_Ampl[11][sub][k]->Draw("COLZ");
             Map_Ampl[11][sub][k]->GetYaxis()->SetRangeUser(0, 72.);
-//            Map_Ampl[11][sub][k]->GetZaxis()->SetRangeUser(0.0001, 1.);
-            if (sub==1) {cHB->Modified(); cHB->Update();} 
-            if (sub==2) {cHE->Modified(); cHE->Update();}
-            if (sub==3) {cONE->Modified();cONE->Update();}
-            if (sub==4) {cHB->Modified(); cHB->Update();} 
-       }//end depth
+            Map_Ampl[11][sub][k]->GetZaxis()->SetRangeUser(0.0001, 1.);
+//            if (sub==1) {cHB->Modified(); cHB->Update();} 
+//            if (sub==2) {cHE->Modified(); cHE->Update();}
+              cONE->Modified();cONE->Update();
+//            if (sub==4) {cHB->Modified(); cHB->Update();} 
+//       }//end depth
     
-       if (sub==1) {cHB->Print("MapRateCapCalibHB.png"); cHB->Clear();} 
-       if (sub==2) {cHE->Print("MapRateCapCalibHE.png"); cHE->Clear();}
+       if (sub==1) {cONE->Print("MapRateCapCalibHB.png"); cONE->Clear();} 
+       if (sub==2) {cONE->Print("MapRateCapCalibHE.png"); cONE->Clear();}
        if (sub==3) {cONE->Print("MapRateCapCalibHO.png"); cONE->Clear();}
-       if (sub==4) {cHB->Print("MapRateCapCalibHF.png"); cHB->Clear();}    
+       if (sub==4) {cONE->Print("MapRateCapCalibHF.png"); cONE->Clear();}    
   }// end sub  
 
 
@@ -527,67 +529,68 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 
   for (int test=12;test<=16;test++) { //Test: 2-Am, 3-Wm, 4-Rm, 5-TNm, 6-TXm, 
       for (int sub=1;sub<=4;sub++) {  //Subdetector: 1-HB, 2-HE, 3-HF, 4-HO
-          if (sub==1) cHB->Divide(2,1);
-          if (sub==2) cHE->Divide(3,1);
+          if (sub==1) cONE->Divide(1,1);//cHB->Divide(2,1);
+          if (sub==2) cONE->Divide(1,1);//cHE->Divide(3,1);
           if (sub==3) cONE->Divide(1,1);
-          if (sub==4) cHB->Divide(2,1);
-          int k_min[5]={0,1,1,4,1}; // minimum depth for each subdet
-          int k_max[5]={0,2,3,4,2}; // maximum depth for each subdet	
-          for (int k=k_min[sub];k<=k_max[sub];k++) {  //Depth 
-              if (sub==1) cHB->cd(k); 
-              if (sub==2) cHE->cd(k);
-	      if (sub==3) cONE->cd(k-3);
-	      if (sub==4) cHB->cd(k);  
+          if (sub==4) cONE->Divide(1,1);//cHB->Divide(2,1);
+//          int k_min[5]={0,1,1,4,1}; // minimum depth for each subdet
+//          int k_max[5]={0,2,3,4,2}; // maximum depth for each subdet	
+//          for (int k=k_min[sub];k<=k_max[sub];k++) {  //Depth           
+	      int k=1;
+	      if (sub==1) {k=1;cONE->cd(k);}//cHB->cd(k); }
+              if (sub==2) {k=1;cONE->cd(k);}//cHE->cd(k); }
+	      if (sub==3) {k=4;cONE->cd(k-3);}
+	      if (sub==4) {k=1;cONE->cd(k);}//cHB->cd(k); } 
               Map_Ampl[test][sub][k]->Divide(Map_Ampl[test][sub][k],Map_Calib[sub][k], 1, 1, "B"); 
               gPad->SetGridy();
               gPad->SetGridx();
               gPad->SetLogz();
-              if (sub==1) sprintf(str,"HB, Depth%d \b", k);
-              if (sub==2) sprintf(str,"HE, Depth%d \b", k);
-              if (sub==3) sprintf(str,"HO, Depth%d \b", k);
-              if (sub==4) sprintf(str,"HF, Depth%d \b", k);  
+              if (sub==1) sprintf(str,"HB");
+              if (sub==2) sprintf(str,"HE");
+              if (sub==3) sprintf(str,"HO");
+              if (sub==4) sprintf(str,"HF");  
               Map_Ampl[test][sub][k]->SetTitle(str);
               Map_Ampl[test][sub][k]->SetXTitle("#eta \b");
               Map_Ampl[test][sub][k]->SetYTitle("#phi \b");
               Map_Ampl[test][sub][k]->SetZTitle("Rate \b");
-	      if (sub==3) Map_Ampl[test][sub][k]->SetTitleOffset(0.8,"Z");
+	      Map_Ampl[test][sub][k]->SetTitleOffset(0.8,"Z");
               Map_Ampl[test][sub][k]->Draw("COLZ");
               Map_Ampl[test][sub][k]->GetYaxis()->SetRangeUser(0, 72.);
- //           Map_Ampl[test][sub][k]->GetZaxis()->SetRangeUser(0.0001, 1.);
-              if (sub==1) {cHB->Modified(); cHB->Update();} 
-              if (sub==2) {cHE->Modified(); cHE->Update();}
-              if (sub==3) {cONE->Modified();cONE->Update();}
-              if (sub==4) {cHB->Modified(); cHB->Update();} 
-          }//end depth    
+              Map_Ampl[test][sub][k]->GetZaxis()->SetRangeUser(0.0001, 1.);
+//              if (sub==1) {cHB->Modified(); cHB->Update();} 
+//              if (sub==2) {cHE->Modified(); cHE->Update();}
+              cONE->Modified();cONE->Update();
+//              if (sub==4) {cHB->Modified(); cHB->Update();} 
+//          }//end depth    
           if (test==12){ 
-	     if (sub==1) {cHB->Print("MapRateAmplCalibHB.png"); cHB->Clear();} 
-             if (sub==2) {cHE->Print("MapRateAmplCalibHE.png"); cHE->Clear();}
+	     if (sub==1) {cONE->Print("MapRateAmplCalibHB.png"); cONE->Clear();} 
+             if (sub==2) {cONE->Print("MapRateAmplCalibHE.png"); cONE->Clear();}
              if (sub==3) {cONE->Print("MapRateAmplCalibHO.png"); cONE->Clear();}
-             if (sub==4) {cHB->Print("MapRateAmplCalibHF.png"); cHB->Clear();} 
+             if (sub==4) {cONE->Print("MapRateAmplCalibHF.png"); cONE->Clear();} 
 	  }   
 	  if (test==13){ 
-	     if (sub==1) {cHB->Print("MapRateRMSCalibHB.png"); cHB->Clear();} 
-             if (sub==2) {cHE->Print("MapRateRMSCalibHE.png"); cHE->Clear();}
+	     if (sub==1) {cONE->Print("MapRateRMSCalibHB.png"); cONE->Clear();} 
+             if (sub==2) {cONE->Print("MapRateRMSCalibHE.png"); cONE->Clear();}
              if (sub==3) {cONE->Print("MapRateRMSCalibHO.png"); cONE->Clear();}
-             if (sub==4) {cHB->Print("MapRateRMSCalibHF.png"); cHB->Clear();} 
+             if (sub==4) {cONE->Print("MapRateRMSCalibHF.png"); cONE->Clear();} 
 	  }
 	  if (test==14){ 
-	     if (sub==1) {cHB->Print("MapRate43TStoAllTSCalibHB.png"); cHB->Clear();} 
-             if (sub==2) {cHE->Print("MapRate43TStoAllTSCalibHE.png"); cHE->Clear();}
+	     if (sub==1) {cONE->Print("MapRate43TStoAllTSCalibHB.png"); cONE->Clear();} 
+             if (sub==2) {cONE->Print("MapRate43TStoAllTSCalibHE.png"); cONE->Clear();}
              if (sub==3) {cONE->Print("MapRate43TStoAllTSCalibHO.png"); cONE->Clear();}
-             if (sub==4) {cHB->Print("MapRate43TStoAllTSCalibHF.png"); cHB->Clear();} 
+             if (sub==4) {cONE->Print("MapRate43TStoAllTSCalibHF.png"); cONE->Clear();} 
 	  }
 	  if (test==15){ 
-	     if (sub==1) {cHB->Print("MapRateMeanPosCalibHB.png"); cHB->Clear();} 
-             if (sub==2) {cHE->Print("MapRateMeanPosCalibHE.png"); cHE->Clear();}
+	     if (sub==1) {cONE->Print("MapRateMeanPosCalibHB.png");cONE->Clear();} 
+             if (sub==2) {cONE->Print("MapRateMeanPosCalibHE.png"); cONE->Clear();}
              if (sub==3) {cONE->Print("MapRateMeanPosCalibHO.png"); cONE->Clear();}
-             if (sub==4) {cHB->Print("MapRateMeanPosCalibHF.png"); cHB->Clear();} 
+             if (sub==4) {cONE->Print("MapRateMeanPosCalibHF.png"); cONE->Clear();} 
 	  }
           if (test==16){ 
-	     if (sub==1) {cHB->Print("MapRateMaxPosCalibHB.png"); cHB->Clear();} 
-             if (sub==2) {cHE->Print("MapRateMaxPosCalibHE.png"); cHE->Clear();}
+	     if (sub==1) {cONE->Print("MapRateMaxPosCalibHB.png"); cONE->Clear();} 
+             if (sub==2) {cONE->Print("MapRateMaxPosCalibHE.png"); cONE->Clear();}
              if (sub==3) {cONE->Print("MapRateMaxPosCalibHO.png"); cONE->Clear();}
-             if (sub==4) {cHB->Print("MapRateMaxPosCalibHF.png"); cHB->Clear();} 
+             if (sub==4) {cONE->Print("MapRateMaxPosCalibHF.png"); cONE->Clear();} 
 	  }
    
           cONE->Divide(1,1);
@@ -892,11 +895,10 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
  } //end sub 
 //======================================================================
 
-
 //======================================================================
 /// Prepare maps of good/bad channels:
 
-    TH2F *Map_ALL = new TH2F("Map","Map", 82, -41, 40, 72, 0, 71);             
+    TH2F *Map_ALL = new TH2F("Map_All","Map_all", 82, -41, 40, 72, 0, 71);             
     int nx = Map_ALL->GetXaxis()->GetNbins();
     int ny = Map_ALL->GetYaxis()->GetNbins();
     int NBad = 0;
@@ -931,25 +933,8 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 	        flag_W = 0;
 	        flag_B = 0;		
 	        for (int test=1;test<=6;test++) { //Test: 1-Wm, 2-Rm, etc
-//Warning		
- 
-                   if ((Map_Ampl[test][sub][k]->GetBinContent(i,j) != 0.)&&(Map_Ampl[test][sub][k]->GetBinContent(i,j) < 0.001) )  {
-	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.) Map_SUB[sub][k]->SetBinContent(i,j,0.75);
-		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.75);
-		      if (flag_W == 0) {
-		         NWarn +=1; 
-		         Eta[1][NWarn]=i-41;
-		         Phi[1][NWarn]=j-1;
-			 Sub[1][NWarn]=sub;
-		         Depth[1][NWarn]=k;
-		         Comment[1][NWarn]=Text[test]; 
-		      } 
-		      else Comment[1][NWarn]+=", "+Text[test];
-		      flag_W = 1;		      		 
-//		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
-                   }
 //Bad			     	                 
-                   if (Map_Ampl[test][sub][k]->GetBinContent(i,j) >= 0.001 )  {
+                   if (Map_Ampl[test][sub][k]->GetBinContent(i,j) > 0.0 )  {
 	              Map_ALL->SetBinContent(i,j,1.);
 		      Map_SUB[sub][k]->SetBinContent(i,j,1.);
 		      if (flag_B == 0) {
@@ -964,10 +949,30 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 		      flag_B = 1;		 
 //		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
                    }
+//Warning		
+/* 
+                   if ((Map_Ampl[test][sub][k]->GetBinContent(i,j) != 0.)&&(Map_Ampl[test][sub][k]->GetBinContent(i,j) < 0.001) )  {
+	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.) Map_SUB[sub][k]->SetBinContent(i,j,0.75);
+		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.75);
+		      if (flag_W == 0) {
+		         NWarn +=1; 
+		         Eta[1][NWarn]=i-41;
+		         Phi[1][NWarn]=j-1;
+			 Sub[1][NWarn]=sub;
+		         Depth[1][NWarn]=k;
+		         Comment[1][NWarn]=Text[test]; 
+		      } 
+		      else Comment[1][NWarn]+=", "+Text[test];
+		      flag_W = 1;		      		 
+//		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
+                   }		   
+*/		   
+		   
 		} //end test
+		
 
 //Calib
-		 for (int test=11;test<=16;test++) { //Test: 1-2.E, 2-2.F, etc
+/*		 for (int test=11;test<=16;test++) { //Test: 1-2.E, 2-2.F, etc
                    if (Map_Ampl[test][sub][k]->GetBinContent(i,j) != 0.)  {
 //	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.0) Map_SUB[sub][k]->SetBinContent(i,j,0.3);
 //		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.3);
@@ -984,23 +989,26 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
 //		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
                   } 
 		} //end test
-
+*/
 //Gain stabil
 		 for (int test=21;test<=21;test++) { //Test: 1-2.E, 2-2.F, etc
                    if (Map_Ampl[test][sub][k]->GetBinContent(i,j) > porog[sub])  {
-	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.0) Map_SUB[sub][k]->SetBinContent(i,j,0.05);
-		      if (Map_ALL->GetBinContent(i,j)!=1.) Map_ALL->SetBinContent(i,j,0.05);
-		      if (flag_W == 0) {
-		         NWarn +=1; 
-		         Eta[1][NWarn]=i-41;
-		         Phi[1][NWarn]=j-1;
-			 Sub[1][NWarn]=sub;
-		         Depth[1][NWarn]=k;
-		         Comment[1][NWarn]=Text[test]; 
-		      } 
-		      else Comment[1][NWarn]+=", "+Text[test];
-		      flag_W = 1;		      		 
+	              if (Map_SUB[sub][k]->GetBinContent(i,j)!=1.0) Map_SUB[sub][k]->SetBinContent(i,j,0.75);
+		      if (Map_ALL->GetBinContent(i,j)!=1.) {
+		          Map_ALL->SetBinContent(i,j,0.75);		      
+		          if (flag_W == 0) {
+                              NWarn +=1; 
+		              Eta[1][NWarn]=i-41;
+		              Phi[1][NWarn]=j-1;
+			      Sub[1][NWarn]=sub;
+		              Depth[1][NWarn]=k;
+		              Comment[1][NWarn]=Text[test]; 
+		          } 
+		          else Comment[1][NWarn]+=", "+Text[test];
+		          flag_W = 1;
+		      		      		 
 //		      cout<<"Map_Ampl["<<test<<"]["<<sub<<"]["<<k<<"]->GetBinContent("<<i<<","<<j<<")= "<<Map_Ampl[test][sub][k]->GetBinContent(i,j)<<endl;
+                      }     
                   } 
 		} //end test		
              }//end Depth
@@ -1080,7 +1088,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFileT << "</html><html xmlns=\"http://www.w3.org/1999/xhtml\">"<< std::endl;
      htmlFileT << "<head>"<< std::endl;
      htmlFileT << "<meta http-equiv=\"Content-Type\" content=\"text/html\"/>"<< std::endl;
-     htmlFileT << "<title> Raw Data Analyser </title>"<< std::endl;
+     htmlFileT << "<title> Remote Monitoring Tool </title>"<< std::endl;
      htmlFileT << "<style type=\"text/css\">"<< std::endl;
      htmlFileT << " body,td{ background-color: #FFFFCC; font-family: arial, arial ce, helvetica; font-size: 12px; }"<< std::endl;
      htmlFileT << "   td.s0 { font-family: arial, arial ce, helvetica; }"<< std::endl;
@@ -1391,7 +1399,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "</html><html xmlns=\"http://www.w3.org/1999/xhtml\">"<< std::endl;
      htmlFile << "<head>"<< std::endl;
      htmlFile << "<meta http-equiv=\"Content-Type\" content=\"text/html\"/>"<< std::endl;
-     htmlFile << "<title> Raw Data Analyser </title>"<< std::endl;
+     htmlFile << "<title> Remote Monitoring Tool </title>"<< std::endl;
      htmlFile << "<style type=\"text/css\">"<< std::endl;
      htmlFile << " body,td{ background-color: #FFFFCC; font-family: arial, arial ce, helvetica; font-size: 12px; }"<< std::endl;
      htmlFile << "   td.s0 { font-family: arial, arial ce, helvetica; }"<< std::endl;
@@ -1550,7 +1558,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "</table>" << std::endl;
      htmlFile << "<br>"<< std::endl;
      
-     htmlFile << "<h3> 2.C.List of Warning channels </h3>"<< std::endl;
+     htmlFile << "<h3> 2.C.List of Gain unstable channels </h3>"<< std::endl;
      htmlFile << "<table>"<< std::endl;     
      
      htmlFile << "<tr>";
@@ -1675,7 +1683,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "   td.s4 { font-family: arial, arial ce, helvetica; background-color: #FFC169; }"<< std::endl;
      htmlFile << "</style>"<< std::endl;
      htmlFile << "<body>"<< std::endl;
-     htmlFile << "<h1> Raw Data Analyser </h1>"<< std::endl;
+     htmlFile << "<h1> Remote Monitoring Tool </h1>"<< std::endl;
      htmlFile << "<br>"<< std::endl;
      htmlFile << "<h2> Description </h2>"<< std::endl; 
      
@@ -1707,7 +1715,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "</html><html xmlns=\"http://www.w3.org/1999/xhtml\">"<< std::endl;
      htmlFile << "<head>"<< std::endl;
      htmlFile << "<meta http-equiv=\"Content-Type\" content=\"text/html\"/>"<< std::endl;
-     htmlFile << "<title> Raw Data Analyser </title>"<< std::endl;
+     htmlFile << "<title> Remote Monitoring Tool </title>"<< std::endl;
      htmlFile << "<style type=\"text/css\">"<< std::endl;
      htmlFile << " body,td{ background-color: #FFFFCC; font-family: arial, arial ce, helvetica; font-size: 12px; }"<< std::endl;
      htmlFile << "   td.s0 { font-family: arial, arial ce, helvetica; }"<< std::endl;
@@ -1718,7 +1726,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "</style>"<< std::endl;
      htmlFile << "<body>"<< std::endl;
      
-     htmlFile << "<h1> Raw Data Analyser, RUN = "<< runnumber <<". </h1>"<< std::endl;
+     htmlFile << "<h1> Remote Monitoring Tool, RUN = "<< runnumber <<". </h1>"<< std::endl;
      htmlFile << "  <td><a href=\"http://test-dtlisov.web.cern.ch/test-dtlisov/LED_"<<runnumber<<"/HELP.html\">RDA tool description</a></td>"<< std::endl;
      htmlFile << "<br>"<< std::endl;
      
@@ -1804,7 +1812,7 @@ void RemoteMonitoringMAP(const char* fname = "test7runs.root", const char* refna
      htmlFile << "</table>" << std::endl;
      htmlFile << "<br>"<< std::endl;
      
-     htmlFile << "<h3> 2.C.List of Warning channels </h3>"<< std::endl;
+     htmlFile << "<h3> 2.C.List of Gain unstable channels </h3>"<< std::endl;
      htmlFile << "<table>"<< std::endl;     
      htmlFile << "<tr>";
      htmlFile << "<td class=\"s4\" align=\"center\">#</td>"    << std::endl;
